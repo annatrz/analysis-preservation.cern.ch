@@ -174,6 +174,17 @@ class CAPDeposit(Deposit):
         return deposit
 
     def edit_permissions(self, data):
+        """Edit deposit permissions.
+
+        We expect an array of objects:
+        [{
+        "email": "",
+        "type": "user|egroup",
+        "op": "add|remove",
+        "action": "deposit-read|deposit-update|deposit-admin"
+        }]
+
+        """
         with db.session.begin_nested():
             for obj in data:
                 if obj['type'] == 'user':
