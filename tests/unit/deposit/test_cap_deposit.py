@@ -28,37 +28,26 @@
 
 from uuid import uuid4
 
-from cap.modules.deposit.api import CAPDeposit as Deposit
-from cap.modules.deposit.errors import DepositValidationError
-
-
 from flask_security import login_user
 from invenio_access.models import ActionUsers
 from jsonschema.exceptions import ValidationError
 from pytest import raises
 from sqlalchemy.exc import IntegrityError
 
-
-def test_create_deposit_with_non_object_data_raises_DepositValidationError(app,
-                                                                           users,
-                                                                           location,
-                                                                           jsonschemas_host):
-    with app.test_request_context():
-        metadata = 5
-        login_user(users['superuser'])
-        id_ = uuid4()
-        with raises(DepositValidationError):
-            Deposit.create(metadata, id_=id_)
+from cap.modules.deposit.api import CAPDeposit as Deposit
+from cap.modules.deposit.errors import DepositValidationError
 
 
 def test_create_deposit_with_empty_data_raises_DepositValidationError(app,
                                                                       users,
                                                                       location,
                                                                       jsonschemas_host):
+    metadata = {}
+
     with app.test_request_context():
-        metadata = {}
         login_user(users['superuser'])
         id_ = uuid4()
+
         with raises(DepositValidationError):
             Deposit.create(metadata, id_=id_)
 
@@ -67,10 +56,12 @@ def test_create_deposit_with_empty_schema_raises_DepositValidationError(app,
                                                                         users,
                                                                         location,
                                                                         jsonschemas_host):
+    metadata = {'$schema': ''}
+
     with app.test_request_context():
-        metadata = {'$schema': ''}
         login_user(users['superuser'])
         id_ = uuid4()
+        
         with raises(DepositValidationError):
             Deposit.create(metadata, id_=id_)
 
@@ -79,79 +70,57 @@ def test_create_deposit_with_wrong_schema_raises_DepositValidationError(app,
                                                                         users,
                                                                         location,
                                                                         jsonschemas_host):
+    metadata = {
+        '$schema': 'https://{}/schemas/deposits/records/non-existing-schema.json'.format(
+            jsonschemas_host)
+    }
+
     with app.test_request_context():
-        metadata = {
-            '$schema': 'https://{}/schemas/deposits/records/lhcb-wrong.json'.format(jsonschemas_host)}
         login_user(users['superuser'])
         id_ = uuid4()
+
         with raises(DepositValidationError):
             Deposit.create(metadata, id_=id_)
 
 
-def test_create_deposit_with_wrong_data_raises_ValidationError(app,
-                                                               users,
-                                                               location,
-                                                               jsonschemas_host
-                                                               ):
-    with app.test_request_context():
-        metadata = {
-            '$schema': 'https://{}/schemas/deposits/records/lhcb-v0.0.1.json'.format(jsonschemas_host),
-            'general_title': ['I am an array, not a string']
-        }
-        login_user(users['superuser'])
-        id_ = uuid4()
-        with raises(ValidationError):
-            Deposit.create(metadata, id_=id_)
-
-
-def test_deposit_class_is_published_method(app,
-                                           users,
-                                           location,
-                                           jsonschemas_host,
-                                           create_deposit):
-    deposit = create_deposit(users['alice_user'], 'alice-analysis-v0.0.1')
-    with app.test_request_context():
-        assert deposit.is_published() is False
-
-
 def test_add_user_permissions_set_access_object_properly(app, db, users, create_deposit):
-    owner, user = users['cms_user'], users['cms_user2']
-    deposit = create_deposit(owner, 'alice-analysis-v0.0.1')
-    assert deposit['_access'] == {
-        'deposit-read': {
-            'users': [owner.id],
-            'roles': []
-        },
-        'deposit-update': {
-            'users': [owner.id],
-            'roles': []
-        },
-        'deposit-admin': {
-            'users': [owner.id],
-            'roles': []
+        owner, other_user = users['cms_user'], users['cms_user2']
+        deposit = create_deposit(owner, 'alice-analysis-v0.0.1')
+        assert deposit['_access'] == {
+            'deposit-read': {
+                'users': [owner.id],
+                'roles': []
+            },
+            'deposit-update': {
+                'users': [owner.id],
+                'roles': []        
+            },
+            'deposit-admin': {
+                'users': [owner.id],
+                'roles': []        
+            }
         }
-    }
 
-    deposit._add_user_permissions(user,
-                                  ['deposit-read',
-                                   'deposit-update'],
-                                  db.session)
+        deposit._add_user_permissions(other_user,
+                                      ['deposit-read',
+                                       'deposit-update'],
+                                      db.session)
 
-    deposit = Deposit.get_record(deposit.id)
-    assert deposit['_access'] == {
-        'deposit-read': {
-            'users': [owner.id, user.id],
-            'roles': []
-        },
-        'deposit-update': {
-            'users': [owner.id, user.id],
-            'roles': []
-        },
-        'deposit-admin': {
-            'users': [owner.id],
-            'roles': []
+        deposit = Deposit.get_record(deposit.id)
+        assert deposit['_access'] == {
+            'deposit-read': {
+                'users': [owner.id, other_user.id],
+                'roles': []        
+            },
+            'deposit-update': {
+                'users': [owner.id, other_user.id],
+                'roles': []        
+            },
+            'deposit-admin': {
+                'users': [owner.id],
+                'roles': []        
+            }
         }
-    }
 
 
 def test_add_user_permissions_adds_action_to_db(app, db, users, deposit):
@@ -167,15 +136,3 @@ def test_add_user_permissions_adds_action_to_db(app, db, users, deposit):
     assert ActionUsers.query.filter_by(action='deposit-read',
                                        argument=str(deposit.id),
                                        user_id=user.id).one()
-
-
-def test_add_user_permissions_when_permission_already_exist_raises_exception(
-        app, db, users, deposit):
-
-    with raises(IntegrityError):
-        deposit._add_user_permissions(users['cms_user'],
-                                      ['deposit-read'],
-                                      db.session)
-        deposit._add_user_permissions(users['cms_user'],
-                                      ['deposit-read'],
-                                      db.session)

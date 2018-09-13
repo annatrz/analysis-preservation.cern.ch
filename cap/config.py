@@ -17,22 +17,10 @@ from os.path import dirname, join
 
 from celery.schedules import crontab
 from flask import request
-
-from cap.modules.deposit.permissions import (CreateDepositPermission,
-                                             DeleteDepositPermission,
-                                             ReadDepositPermission,
-                                             UpdateDepositPermission)
-from cap.modules.oauthclient.contrib.cern import (account_info, account_setup,
-                                                  disconnect_handler)
-from cap.modules.oauthclient.rest_handlers import (authorized_signup_handler,
-                                                   signup_handler)
-from cap.modules.records.permissions import ReadRecordPermission
-from cap.modules.records.search import cap_record_search_factory
-from cap.modules.search.facets import nested_filter
 from flask_principal import RoleNeed
 from invenio_deposit import config as deposit_config
 from invenio_deposit.config import DEPOSIT_REST_SORT_OPTIONS
-from invenio_deposit.scopes import write_scope
+from invenio_deposit.scopes import DepositScope, write_scope
 from invenio_deposit.utils import check_oauth2_scope
 from invenio_records_rest.config import (RECORDS_REST_ENDPOINTS,
                                          RECORDS_REST_FACETS,
@@ -41,6 +29,19 @@ from invenio_records_rest.facets import terms_filter
 from invenio_records_rest.utils import allow_all, deny_all
 from jsonresolver import JSONResolver
 from jsonresolver.contrib.jsonref import json_loader_factory
+
+from cap.modules.deposit.permissions import (AdminDepositPermission,
+                                             CreateDepositPermission,
+                                             ReadDepositPermission,
+                                             UpdateDepositPermission)
+from cap.modules.oauthclient.contrib.cern import (account_info, account_setup,
+                                                  disconnect_handler)
+from cap.modules.oauthclient.rest_handlers import (authorized_signup_handler,
+                                                   signup_handler)
+from cap.modules.records.permissions import (ReadRecordPermission,
+                                             record_read_permission_factory)
+from cap.modules.records.search import cap_record_search_factory
+from cap.modules.search.facets import nested_filter
 
 
 def _(x):
@@ -437,11 +438,6 @@ SEARCH_ELASTIC_HOSTS = [
     )
 ]
 
-#: Search query enhancers
-SEARCH_QUERY_ENHANCERS = [
-    'cap.modules.access.ext:authenticated_query'
-]
-
 # Admin
 # ========
 ADMIN_PERMISSION_FACTORY =  \
@@ -503,6 +499,10 @@ JSONSCHEMAS_ROOT = os.path.join(APP_ROOT, 'jsonschemas')
 # directories with jsonschemas
 JSONSCHEMAS_DEPOSIT_DIR = 'deposits/records/'
 JSONSCHEMAS_RECORDS_DIR = 'records/'
+
+# WARNING: Do not share the secret key - especially do not commit it to
+# version control.
+SECRET_KEY = "changeme"
 
 # Ana's database
 LHCB_ANA_DB = 'http://datadependency.cern.ch'
