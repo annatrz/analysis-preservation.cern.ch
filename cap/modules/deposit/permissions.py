@@ -162,3 +162,10 @@ class AdminDepositPermission(DepositPermission):
     def __init__(self, record):
         """Initialize state."""
         super(AdminDepositPermission, self).__init__(record, 'admin')
+
+
+class CloneDepositPermission(DepositPermission):
+    """Deposit admin permission."""
+    def __init__(self, record):
+        """Initialize state."""
+        super(CloneDepositPermission, self).__init__(record, 'read')
