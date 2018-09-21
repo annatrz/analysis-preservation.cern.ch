@@ -90,19 +90,17 @@ In templates you can add a sign in/up link:
 
 from flask import current_app, g, redirect, session
 from flask_login import current_user
-from flask_principal import AnonymousIdentity, identity_changed, \
-    identity_loaded
+from flask_principal import (AnonymousIdentity, identity_changed,
+                             identity_loaded)
+from invenio_access import superuser_access
 from invenio_db import db
-
+from invenio_oauthclient.contrib.cern import (OAUTHCLIENT_CERN_REFRESH_TIMEDELTA,
+                                              OAUTHCLIENT_CERN_SESSION_KEY,
+                                              account_groups, extend_identity,
+                                              find_remote_by_client_id,
+                                              get_resource)
 from invenio_oauthclient.models import RemoteAccount
 from invenio_oauthclient.utils import oauth_link_external_id
-
-from invenio_oauthclient.contrib.cern import (
-    OAUTHCLIENT_CERN_REFRESH_TIMEDELTA, OAUTHCLIENT_CERN_SESSION_KEY,
-
-    find_remote_by_client_id, account_groups,
-    extend_identity, get_resource
-)
 
 
 def account_info(remote, resp):
@@ -200,8 +198,19 @@ def on_identity_changed(sender, identity):
 
     extend_identity(identity, groups)
 
+    assign_superuser_access_based_on_egroup(identity)
+
+
+def assign_superuser_access_based_on_egroup(identity):
+    superuser_roles = current_app.config['SUPERUSER_EGROUPS']
+
+    for role in superuser_roles:
+        if role in identity.provides:
+            identity.provides.add(superuser_access)
+
 
 @identity_loaded.connect
 def on_identity_loaded(sender, identity):
     """Store groups in session whenever identity is loaded."""
+    assign_superuser_access_based_on_egroup(identity)
     identity.provides.update(session.get(OAUTHCLIENT_CERN_SESSION_KEY, []))
