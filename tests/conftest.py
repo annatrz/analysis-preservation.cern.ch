@@ -195,8 +195,9 @@ def create_schema(db, es):
         Add new schema into db
         """
         default_json = {
-            'type': 'object',
-            'additionalProperties': False
+            'title': {
+                'type': 'string'
+            }
         }
 
         try:

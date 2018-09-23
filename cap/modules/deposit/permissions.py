@@ -97,8 +97,6 @@ class DepositPermission(Permission):
         if action in self.actions:
             _needs.add(self.actions[action](deposit))
 
-        self._needs = _needs
-
         super(DepositPermission, self).__init__(*_needs)
 
 
@@ -111,8 +109,6 @@ class CreateDepositPermission(Permission):
 
         data = request.get_json(force=True)
         _needs.update(self._get_schema_needs(data))
-
-        self._needs = _needs
 
         super(CreateDepositPermission, self).__init__(*_needs)
 
