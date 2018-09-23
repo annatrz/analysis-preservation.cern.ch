@@ -1,9 +1,9 @@
 {
   "fullname": "Detector State", 
   "experiment": "CMS", 
-  "partial": true, 
   "jsonschema": {
     "$schema": "http://json-schema.org/draft-04/schema#", 
+    "title": "Detector State", 
     "type": "object", 
     "description": "Information concerning the state of the detector", 
     "properties": {
@@ -31,6 +31,11 @@
         "type": "string", 
         "title": "Detailed Description"
       }, 
+      "analysis_code": {
+        "x-cap-file": {}, 
+        "type": "string", 
+        "title": "Analysis Code"
+      }, 
       "description": {
         "type": "string", 
         "title": "Measurement Description"
@@ -41,13 +46,8 @@
         }, 
         "type": "array", 
         "title": "Processing Steps"
-      }, 
-      "analysis_code": {
-        "x-cap-file": {}, 
-        "type": "string", 
-        "title": "Analysis Code"
       }
-    }, 
-    "title": "Detector State"
-  }
+    }
+  }, 
+  "deposit": false
 }

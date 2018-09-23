@@ -1,7 +1,6 @@
 {
   "fullname": "Multiple Step Scheduler", 
   "experiment": null, 
-  "partial": true, 
   "jsonschema": {
     "oneOf": [
       {
@@ -17,6 +16,10 @@
     "required": [
       "scheduler_type"
     ], 
+    "id": "multistep-stage", 
+    "additionalProperties": false, 
+    "$schema": "http://json-schema.org/draft-04/schema#", 
+    "type": "object", 
     "properties": {
       "partitionsize": {
         "type": "number"
@@ -59,10 +62,7 @@
         }, 
         "title": "Scatter"
       }
-    }, 
-    "additionalProperties": false, 
-    "$schema": "http://json-schema.org/draft-04/schema#", 
-    "type": "object", 
-    "id": "multistep-stage"
-  }
+    }
+  }, 
+  "deposit": false
 }

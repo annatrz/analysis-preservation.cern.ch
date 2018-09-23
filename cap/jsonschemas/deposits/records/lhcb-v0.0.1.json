@@ -1,7 +1,6 @@
 {
   "fullname": "LHCb Analysis",
   "experiment": "LHCb",
-  "partial": false,
   "jsonschema": {
     "additionalProperties": false,
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -99,10 +98,6 @@
           "https://analysispreservation.cern.ch/schemas/deposits/common/file-v0.0.1.json"
       },
       "basic_info": {
-        "description":
-          "Please provide some information relevant for all parts of the Analysis here",
-        "type": "object",
-        "id": "basic_info",
         "properties": {
           "analysis_proponents": {
             "items": {
@@ -193,7 +188,11 @@
             "title": "Institutes Involved"
           }
         },
-        "title": "Basic Information"
+        "title": "Basic Information",
+        "type": "object",
+        "description":
+          "Please provide some information relevant for all parts of the Analysis here",
+        "id": "basic_info"
       },
       "$ana_type": {
         "type": "string"
@@ -210,26 +209,51 @@
           "https://analysispreservation.cern.ch/schemas/deposits/common/deposit-v0.0.1.json"
       },
       "additional_resources": {
+        "title": "Additional Resources",
+        "type": "object",
         "properties": {
-          "documentations": {
+          "publications": {
             "items": {
-              "title": "Documentation",
               "type": "object",
-              "description": "Add documentation",
               "properties": {
+                "roles": {
+                  "type": "string",
+                  "title": "Roles"
+                },
+                "public_paper": {
+                  "type": "string",
+                  "title": "Public Paper"
+                },
+                "arxiv_id": {
+                  "type": "string",
+                  "title": "ArXiv ID"
+                },
+                "review_egroup": {
+                  "type": "string",
+                  "title": "Review Group"
+                },
                 "url": {
                   "type": "string",
                   "title": "URL"
                 },
-                "title": {
+                "conf_report": {
                   "type": "string",
-                  "title": "Title"
+                  "title": "Conference Report (CONF)"
+                },
+                "analysis_number": {
+                  "type": "string",
+                  "title": "Analysis Note (ANA)"
+                },
+                "twiki": {
+                  "type": "string",
+                  "title": "TWiki Page"
                 }
-              }
+              },
+              "title": "Publications"
             },
             "type": "array",
-            "id": "documentations",
-            "title": "Documentations"
+            "id": "publications",
+            "title": "Publications"
           },
           "internal_discussions": {
             "items": {
@@ -277,54 +301,29 @@
             "id": "presentations",
             "title": "Presentations"
           },
-          "publications": {
+          "documentations": {
             "items": {
-              "type": "object",
               "properties": {
-                "roles": {
-                  "type": "string",
-                  "title": "Roles"
-                },
-                "public_paper": {
-                  "type": "string",
-                  "title": "Public Paper"
-                },
-                "arxiv_id": {
-                  "type": "string",
-                  "title": "ArXiv ID"
-                },
-                "review_egroup": {
-                  "type": "string",
-                  "title": "Review Group"
-                },
-                "twiki": {
-                  "type": "string",
-                  "title": "TWiki Page"
-                },
                 "url": {
                   "type": "string",
                   "title": "URL"
                 },
-                "conf_report": {
+                "title": {
                   "type": "string",
-                  "title": "Conference Report (CONF)"
-                },
-                "analysis_number": {
-                  "type": "string",
-                  "title": "Analysis Note (ANA)"
+                  "title": "Title"
                 }
               },
-              "title": "Publications"
+              "type": "object",
+              "description": "Add documentation",
+              "title": "Documentation"
             },
             "type": "array",
-            "id": "publications",
-            "title": "Publications"
+            "id": "documentations",
+            "title": "Documentations"
           }
         },
-        "type": "object",
         "description":
-          "Please provide information about the additional resources of the analysis",
-        "title": "Additional Resources"
+          "Please provide information about the additional resources of the analysis"
       },
       "$schema": {
         "type": "string"
@@ -357,14 +356,6 @@
             },
             "title": "Basic scripts"
           },
-          "docker_registries": {
-            "items": {
-              "x-cap-file": {},
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Docker images of the analysis"
-          },
           "gitlab_links": {
             "items": {
               "x-cap-file": {},
@@ -372,6 +363,14 @@
             },
             "type": "array",
             "title": "Gitlab repositories of the analysis"
+          },
+          "docker_registries": {
+            "items": {
+              "x-cap-file": {},
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Docker images of the analysis"
           }
         },
         "title": "User Analysis"
@@ -381,5 +380,6 @@
       }
     },
     "title": "LHCb Analysis"
-  }
+  },
+  "deposit": true
 }

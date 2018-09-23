@@ -1,7 +1,6 @@
 {
   "fullname": "ATLAS Workflows",
   "experiment": "ATLAS",
-  "partial": false,
   "jsonschema": {
     "title": "ATLAS Workflows",
     "required": ["workflows"],
@@ -16,9 +15,9 @@
       "control_number": {
         "type": "string"
       },
-      "workflows": {
+      "_deposit": {
         "$ref":
-          "https://analysispreservation.cern.ch/schemas/definitions/atlas-workflows-v0.0.1.json"
+          "https://analysispreservation.cern.ch/schemas/deposits/common/deposit-v0.0.1.json"
       },
       "_files": {
         "$ref":
@@ -44,9 +43,9 @@
         "$ref":
           "https://analysispreservation.cern.ch/schemas/deposits/common/access-v0.0.1.json"
       },
-      "_deposit": {
+      "workflows": {
         "$ref":
-          "https://analysispreservation.cern.ch/schemas/deposits/common/deposit-v0.0.1.json"
+          "https://analysispreservation.cern.ch/schemas/definitions/atlas-workflows-v0.0.1.json"
       },
       "$schema": {
         "type": "string"
@@ -55,5 +54,6 @@
         "type": "string"
       }
     }
-  }
+  },
+  "deposit": true
 }

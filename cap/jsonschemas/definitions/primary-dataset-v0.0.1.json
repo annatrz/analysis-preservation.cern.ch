@@ -1,9 +1,9 @@
 {
   "fullname": "Primary Dataset", 
   "experiment": null, 
-  "partial": true, 
   "jsonschema": {
     "$schema": "http://json-schema.org/draft-04/schema#", 
+    "title": "Primary Dataset", 
     "type": "object", 
     "description": "Information concerning the CMS Primary Dataset used", 
     "properties": {
@@ -21,16 +21,16 @@
             "title": "Run #"
           }, 
           "description": {
-            "format": "textarea", 
+            "title": "Description", 
             "type": "string", 
             "description": "Provide a description for the primary dataset", 
-            "title": "Description"
+            "format": "textarea"
           }, 
           "date_modified": {
             "hidden": "true", 
-            "format": "datetime", 
+            "title": "Modified", 
             "type": "string", 
-            "title": "Modified"
+            "format": "datetime"
           }, 
           "persistent_identifiers": {
             "items": {
@@ -46,12 +46,14 @@
             "title": "Year Availble"
           }, 
           "date_issued": {
-            "format": "datetime", 
+            "title": "Issued", 
             "type": "string", 
             "description": "Provide date/time the primary dataset was issued", 
-            "title": "Issued"
+            "format": "datetime"
           }, 
           "numbers": {
+            "title": "Numbers", 
+            "type": "object", 
             "properties": {
               "files": {
                 "type": "number", 
@@ -74,9 +76,7 @@
                 "title": "Number of lumis"
               }
             }, 
-            "type": "object", 
-            "description": "Numbers concerning various stuff", 
-            "title": "Numbers"
+            "description": "Numbers concerning various stuff"
           }, 
           "licence": {
             "type": "string", 
@@ -90,8 +90,8 @@
           }, 
           "dataset_title": {
             "autocomplete": true, 
-            "propertyOrder": 201, 
             "type": "string", 
+            "propertyOrder": 201, 
             "description": "e.g. /Mu/Run2010B-Apr21ReReco-v1/AOD", 
             "title": "Title"
           }
@@ -125,14 +125,13 @@
       }, 
       "selection_triggers": {
         "items": {
+          "title": "Trigger", 
+          "type": "object", 
           "properties": {
-            "element": {
+            "run_period": {
               "enum": [], 
               "type": "string", 
-              "dependencies": [
-                "run_period"
-              ], 
-              "title": "Element"
+              "title": "Run Period"
             }, 
             "trigger": {
               "enum": [], 
@@ -148,21 +147,22 @@
               "type": "string", 
               "title": "Trigger Efficiency"
             }, 
-            "run_period": {
+            "element": {
               "enum": [], 
               "type": "string", 
-              "title": "Run Period"
+              "dependencies": [
+                "run_period"
+              ], 
+              "title": "Element"
             }
           }, 
-          "type": "object", 
-          "id": "trigger", 
-          "title": "Trigger"
+          "id": "trigger"
         }, 
         "type": "array", 
         "description": "Add triggers here", 
         "title": "Selection Triggers"
       }
-    }, 
-    "title": "Primary Dataset"
-  }
+    }
+  }, 
+  "deposit": false
 }

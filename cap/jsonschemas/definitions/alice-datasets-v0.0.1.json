@@ -1,7 +1,6 @@
 {
   "fullname": null, 
   "experiment": "ALICE", 
-  "partial": true, 
   "jsonschema": {
     "items": {
       "type": "object", 
@@ -31,9 +30,9 @@
           "type": "array", 
           "title": "Run"
         }, 
-        "dataset_aod": {
+        "train_id": {
           "type": "string", 
-          "title": "Dataset AOD"
+          "title": "Train ID"
         }, 
         "run_id": {
           "type": "string", 
@@ -55,9 +54,9 @@
           "type": "string", 
           "title": "Reference Production"
         }, 
-        "train_id": {
+        "dataset_aod": {
           "type": "string", 
-          "title": "Train ID"
+          "title": "Dataset AOD"
         }, 
         "wagon_paths": {
           "type": "string", 
@@ -66,5 +65,6 @@
       }
     }, 
     "type": "array"
-  }
+  }, 
+  "deposit": false
 }

@@ -1,9 +1,12 @@
 {
   "fullname": "Yadage Workflow", 
   "experiment": null, 
-  "partial": true, 
   "jsonschema": {
     "title": "Yadage Workflow", 
+    "id": "yadage_workflow", 
+    "additionalProperties": false, 
+    "$schema": "http://json-schema.org/draft-04/schema#", 
+    "type": "object", 
     "properties": {
       "stages": {
         "items": {
@@ -12,10 +15,7 @@
         "type": "array", 
         "title": "Stages"
       }
-    }, 
-    "additionalProperties": false, 
-    "$schema": "http://json-schema.org/draft-04/schema#", 
-    "type": "object", 
-    "id": "yadage_workflow"
-  }
+    }
+  }, 
+  "deposit": false
 }

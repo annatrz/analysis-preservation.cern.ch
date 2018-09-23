@@ -1,12 +1,15 @@
 {
   "fullname": "jq Scheduler", 
   "experiment": null, 
-  "partial": true, 
   "jsonschema": {
     "title": "jq Scheduler", 
     "required": [
       "scheduler_type"
     ], 
+    "id": "jq-stage", 
+    "additionalProperties": true, 
+    "$schema": "http://json-schema.org/draft-04/schema#", 
+    "type": "object", 
     "properties": {
       "workflow": {
         "$ref": "https://analysispreservation.cern.ch/schemas/definitions/workflow_schemas/yadage/workflow-schema-v0.0.1.json#"
@@ -32,10 +35,7 @@
         ], 
         "type": "string"
       }
-    }, 
-    "additionalProperties": true, 
-    "$schema": "http://json-schema.org/draft-04/schema#", 
-    "type": "object", 
-    "id": "jq-stage"
-  }
+    }
+  }, 
+  "deposit": false
 }

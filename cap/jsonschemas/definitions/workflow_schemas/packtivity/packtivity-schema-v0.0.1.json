@@ -1,7 +1,6 @@
 {
   "fullname": "Packtivity Meta Description", 
   "experiment": null, 
-  "partial": true, 
   "jsonschema": {
     "title": "Packtivity Meta Description", 
     "required": [
@@ -9,6 +8,10 @@
       "publisher", 
       "environment"
     ], 
+    "id": "packtivity_meta", 
+    "additionalProperties": false, 
+    "$schema": "http://json-schema.org/draft-04/schema#", 
+    "type": "object", 
     "properties": {
       "process": {
         "oneOf": [
@@ -67,10 +70,7 @@
         "type": "object", 
         "title": "Enviroment"
       }
-    }, 
-    "additionalProperties": false, 
-    "$schema": "http://json-schema.org/draft-04/schema#", 
-    "type": "object", 
-    "id": "packtivity_meta"
-  }
+    }
+  }, 
+  "deposit": false
 }

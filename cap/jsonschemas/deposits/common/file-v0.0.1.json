@@ -1,23 +1,22 @@
 {
   "fullname": null, 
   "experiment": null, 
-  "partial": true, 
   "jsonschema": {
     "items": {
       "type": "object", 
       "description": "Describe information needed for files in records.", 
       "properties": {
+        "bucket": {
+          "type": "string"
+        }, 
         "type": {
           "type": "string", 
           "description": "File type extension."
         }, 
-        "bucket": {
+        "version_id": {
           "type": "string"
         }, 
         "key": {
-          "type": "string"
-        }, 
-        "version_id": {
           "type": "string"
         }, 
         "size": {
@@ -26,5 +25,6 @@
       }
     }, 
     "type": "array"
-  }
+  }, 
+  "deposit": false
 }

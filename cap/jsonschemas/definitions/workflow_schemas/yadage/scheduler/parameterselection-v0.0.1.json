@@ -1,12 +1,15 @@
 {
   "fullname": "Parameter Selection", 
   "experiment": null, 
-  "partial": true, 
   "jsonschema": {
     "title": "Parameter Selection", 
     "items": {
       "type": "object", 
       "properties": {
+        "key": {
+          "type": "string", 
+          "title": "Key/Attribute"
+        }, 
         "value": {
           "oneOf": [
             {
@@ -47,10 +50,6 @@
             }
           ], 
           "title": "Value"
-        }, 
-        "key": {
-          "type": "string", 
-          "title": "Key/Attribute"
         }
       }
     }, 
@@ -58,5 +57,6 @@
     "$schema": "http://json-schema.org/draft-04/schema#", 
     "type": "array", 
     "id": "parameter_selection"
-  }
+  }, 
+  "deposit": false
 }

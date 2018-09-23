@@ -1,9 +1,9 @@
 {
   "fullname": "ATLAS Publications", 
   "experiment": "ATLAS", 
-  "partial": true, 
   "jsonschema": {
     "$schema": "http://json-schema.org/draft-04/schema#", 
+    "title": "ATLAS Publications", 
     "type": "object", 
     "description": "Information concerning the publications related to a dataset", 
     "properties": {
@@ -35,7 +35,7 @@
         "type": "string", 
         "title": "Comment"
       }
-    }, 
-    "title": "ATLAS Publications"
-  }
+    }
+  }, 
+  "deposit": false
 }

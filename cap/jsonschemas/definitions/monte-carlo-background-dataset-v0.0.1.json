@@ -1,9 +1,9 @@
 {
   "fullname": "Monte Carlo Background Dataset", 
   "experiment": null, 
-  "partial": true, 
   "jsonschema": {
     "$schema": "http://json-schema.org/draft-04/schema#", 
+    "title": "Monte Carlo Background Dataset", 
     "type": "object", 
     "description": "Information concerning the Monte Carlo Background Dataset used", 
     "properties": {
@@ -21,16 +21,16 @@
             "title": "Run #"
           }, 
           "description": {
-            "format": "textarea", 
+            "title": "Description", 
             "type": "string", 
             "description": "Provide a description for the MC dataset", 
-            "title": "Description"
+            "format": "textarea"
           }, 
           "date_modified": {
             "hidden": "true", 
-            "format": "datetime", 
+            "title": "Modified", 
             "type": "string", 
-            "title": "Modified"
+            "format": "datetime"
           }, 
           "persistent_identifiers": {
             "items": {
@@ -46,12 +46,14 @@
             "title": "Year Availble"
           }, 
           "date_issued": {
-            "format": "datetime", 
+            "title": "Issued", 
             "type": "string", 
             "description": "Provide date/time the dataset was issued", 
-            "title": "Issued"
+            "format": "datetime"
           }, 
           "numbers": {
+            "title": "Numbers", 
+            "type": "object", 
             "properties": {
               "files": {
                 "type": "number", 
@@ -74,9 +76,7 @@
                 "title": "Number of lumis"
               }
             }, 
-            "type": "object", 
-            "description": "Numbers concerning various stuff", 
-            "title": "Numbers"
+            "description": "Numbers concerning various stuff"
           }, 
           "licence": {
             "type": "string", 
@@ -90,8 +90,8 @@
           }, 
           "dataset_title": {
             "autocomplete": true, 
-            "propertyOrder": 301, 
             "type": "string", 
+            "propertyOrder": 301, 
             "description": "e.g. /Mu/Run2010B-Apr21ReReco-v1/AOD", 
             "title": "Title"
           }
@@ -136,7 +136,7 @@
             "generator_tune": {
               "type": "object", 
               "properties": {
-                "tune": {
+                "generator": {
                   "enum": [
                     "need", 
                     "more", 
@@ -144,7 +144,7 @@
                   ], 
                   "type": "string"
                 }, 
-                "generator": {
+                "tune": {
                   "enum": [
                     "need", 
                     "more", 
@@ -164,7 +164,7 @@
         "type": "array", 
         "title": "MC Background"
       }
-    }, 
-    "title": "Monte Carlo Background Dataset"
-  }
+    }
+  }, 
+  "deposit": false
 }

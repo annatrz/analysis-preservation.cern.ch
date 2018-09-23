@@ -1,12 +1,15 @@
 {
   "fullname": "Local Process Environment for Testing", 
   "experiment": null, 
-  "partial": true, 
   "jsonschema": {
     "title": "Local Process Environment for Testing", 
     "required": [
       "environment_type"
     ], 
+    "id": "localproc", 
+    "additionalProperties": false, 
+    "$schema": "http://json-schema.org/draft-04/schema#", 
+    "type": "object", 
     "properties": {
       "environment_type": {
         "default": "localproc-env", 
@@ -15,10 +18,7 @@
         ], 
         "type": "string"
       }
-    }, 
-    "additionalProperties": false, 
-    "$schema": "http://json-schema.org/draft-04/schema#", 
-    "type": "object", 
-    "id": "localproc"
-  }
+    }
+  }, 
+  "deposit": false
 }

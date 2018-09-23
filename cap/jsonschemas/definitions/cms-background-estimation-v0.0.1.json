@@ -1,11 +1,31 @@
 {
   "fullname": null, 
   "experiment": "CMS", 
-  "partial": true, 
   "jsonschema": {
     "$schema": "http://json-schema.org/draft-04/schema#", 
     "type": "object", 
     "properties": {
+      "samples": {
+        "items": {
+          "type": "string"
+        }, 
+        "type": "array", 
+        "description": "Provide all necessary samples from DAS", 
+        "title": "Samples"
+      }, 
+      "type": {
+        "type": "string", 
+        "title": "Type"
+      }, 
+      "method": {
+        "enum": [
+          "directly_from_mc_simulation", 
+          "shape_from_mc_simulation_and_normalization_from_control_regions", 
+          "shape_and_normalization_from_control_regions"
+        ], 
+        "type": "string", 
+        "title": "Estimation Method"
+      }, 
       "control_regions": {
         "items": {
           "type": "object", 
@@ -29,28 +49,8 @@
         }, 
         "type": "array", 
         "title": "Control Regions"
-      }, 
-      "type": {
-        "type": "string", 
-        "title": "Type"
-      }, 
-      "method": {
-        "enum": [
-          "directly_from_mc_simulation", 
-          "shape_from_mc_simulation_and_normalization_from_control_regions", 
-          "shape_and_normalization_from_control_regions"
-        ], 
-        "type": "string", 
-        "title": "Estimation Method"
-      }, 
-      "samples": {
-        "items": {
-          "type": "string"
-        }, 
-        "type": "array", 
-        "description": "Provide all necessary samples from DAS", 
-        "title": "Samples"
       }
     }
-  }
+  }, 
+  "deposit": false
 }

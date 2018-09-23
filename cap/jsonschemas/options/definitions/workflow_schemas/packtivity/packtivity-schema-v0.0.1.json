@@ -1,7 +1,6 @@
 {
   "fullname": "Step", 
   "experiment": null, 
-  "partial": true, 
   "jsonschema": {
     "items": [
       {
@@ -15,8 +14,8 @@
             "value": "0"
           }
         ], 
-        "placeholder": "Select sub-schema to use", 
         "type": "select", 
+        "placeholder": "Select sub-schema to use", 
         "key": "workflows[].workflow.stages[].scheduler.step.process.process_type", 
         "title": "Process Type"
       }, 
@@ -24,8 +23,8 @@
         "items": {
           "$ref": "https://analysispreservation.cern.ch/schemas/options/definitions/workflow_schemas/packtivity/process/stringinterp-schema-v0.0.1.json"
         }, 
-        "condition": "model['workflows'][arrayIndices[0]]['workflow']['stages'][arrayIndices[1]]['scheduler']['step']['process_type'] == 0", 
-        "key": "workflows[].workflow.stages[].scheduler.step.process"
+        "key": "workflows[].workflow.stages[].scheduler.step.process", 
+        "condition": "model['workflows'][arrayIndices[0]]['workflow']['stages'][arrayIndices[1]]['scheduler']['step']['process_type'] == 0"
       }, 
       {
         "titleMap": [
@@ -50,8 +49,8 @@
             "value": "fromglob-pub"
           }
         ], 
-        "placeholder": "Select sub-schema to use", 
         "type": "select", 
+        "placeholder": "Select sub-schema to use", 
         "key": "workflows[].workflow.stages[].scheduler.step.publisher.publisher_type", 
         "title": "Publisher Type"
       }, 
@@ -59,33 +58,34 @@
         "items": {
           "$ref": "https://analysispreservation.cern.ch/schemas/options/definitions/workflow_schemas/packtivity/publisher/constant-pub-schema-v0.0.1.json"
         }, 
-        "condition": "model['workflows'][arrayIndices[0]]['workflow']['stages'][arrayIndices[1]]['scheduler']['step']['publisher']['publisher_type'] == 'constant-pub'", 
-        "key": "workflows[].workflow.stages[].scheduler.step.publisher"
+        "key": "workflows[].workflow.stages[].scheduler.step.publisher", 
+        "condition": "model['workflows'][arrayIndices[0]]['workflow']['stages'][arrayIndices[1]]['scheduler']['step']['publisher']['publisher_type'] == 'constant-pub'"
       }, 
       {
         "items": {
           "$ref": "https://analysispreservation.cern.ch/schemas/options/definitions/workflow_schemas/packtivity/publisher/frompar-pub-schema-v0.0.1.json"
         }, 
-        "condition": "model['workflows'][arrayIndices[0]]['workflow']['stages'][arrayIndices[1]]['scheduler']['step']['publisher']['publisher_type'] == 'frompar-pub'", 
-        "key": "workflows[].workflow.stages[].scheduler.step.publisher"
+        "key": "workflows[].workflow.stages[].scheduler.step.publisher", 
+        "condition": "model['workflows'][arrayIndices[0]]['workflow']['stages'][arrayIndices[1]]['scheduler']['step']['publisher']['publisher_type'] == 'frompar-pub'"
       }, 
       {
         "items": {
           "$ref": "https://analysispreservation.cern.ch/schemas/options/definitions/workflow_schemas/packtivity/publisher/fromyaml-pub-schema-v0.0.1.json"
         }, 
-        "condition": "model['workflows'][arrayIndices[0]]['workflow']['stages'][arrayIndices[1]]['scheduler']['step']['publisher']['publisher_type'] == 'fromyaml-pub'", 
-        "key": "workflows[].workflow.stages[].scheduler.step.publisher"
+        "key": "workflows[].workflow.stages[].scheduler.step.publisher", 
+        "condition": "model['workflows'][arrayIndices[0]]['workflow']['stages'][arrayIndices[1]]['scheduler']['step']['publisher']['publisher_type'] == 'fromyaml-pub'"
       }, 
       {
         "items": {
           "$ref": "https://analysispreservation.cern.ch/schemas/options/definitions/workflow_schemas/packtivity/publisher/fromglob-pub-schema-v0.0.1.json"
         }, 
-        "condition": "model['workflows'][arrayIndices[0]]['workflow']['stages'][arrayIndices[1]]['scheduler']['step']['publisher']['publisher_type'] == 'fromglob-pub'", 
-        "key": "workflows[].workflow.stages[].scheduler.step.publisher"
+        "key": "workflows[].workflow.stages[].scheduler.step.publisher", 
+        "condition": "model['workflows'][arrayIndices[0]]['workflow']['stages'][arrayIndices[1]]['scheduler']['step']['publisher']['publisher_type'] == 'fromglob-pub'"
       }
     ], 
     "type": "fieldset", 
     "key": "workflows[].workflow.stages[].scheduler.step", 
     "title": "Step"
-  }
+  }, 
+  "deposit": false
 }

@@ -55,9 +55,9 @@ class Schema(db.Model):
 
     experiment = db.Column(db.String(128), unique=False, nullable=True)
 
-    partial = db.Column(db.Boolean(create_constraint=False),
-                        unique=False,
-                        default=False)
+    is_deposit = db.Column(db.Boolean(create_constraint=False),
+                           unique=False,
+                           default=False)
 
     json = db.Column(
         JSONType().with_variant(
@@ -166,9 +166,9 @@ class Schema(db.Model):
 
     @classmethod
     def get_user_deposit_schemas(cls):
-        """Return all deposits schemas that are not partial and user has access to."""
+        """Return all deposit schemas user has access to."""
         schemas = cls.query.filter(
-            cls.partial.isnot(True),
+            cls.is_deposit.isnot(False),
             cls.name.startswith('deposits/records')
         ).all()
 
@@ -189,7 +189,7 @@ class Schema(db.Model):
 @event.listens_for(Schema, 'after_insert')
 def after_insert_schema(target, value, initiator):
     """On schema insert, create corresponding indexes and aliases in ES."""
-    if not initiator.partial:
+    if initiator.is_deposit:
         # invenio search needs it
         current_search.mappings[initiator.index_name] = {}
 

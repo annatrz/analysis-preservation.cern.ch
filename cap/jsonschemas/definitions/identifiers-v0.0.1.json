@@ -1,9 +1,9 @@
 {
   "fullname": "Identifier", 
   "experiment": null, 
-  "partial": true, 
   "jsonschema": {
     "$schema": "http://json-schema.org/draft-04/schema#", 
+    "title": "Identifier", 
     "type": "object", 
     "description": "An issued identifier", 
     "properties": {
@@ -15,7 +15,7 @@
         "type": "string", 
         "title": "Identifier"
       }
-    }, 
-    "title": "Identifier"
-  }
+    }
+  }, 
+  "deposit": false
 }

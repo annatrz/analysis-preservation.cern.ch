@@ -1,9 +1,9 @@
 {
   "fullname": "ATLAS Analysis",
   "experiment": "ATLAS",
-  "partial": false,
   "jsonschema": {
     "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "ATLAS Analysis",
     "type": "object",
     "description": "Schema describing properties of an ATLAS analysis",
     "properties": {
@@ -27,9 +27,9 @@
         "type": "array",
         "id": "input_datasets"
       },
-      "workflows": {
+      "_deposit": {
         "$ref":
-          "https://analysispreservation.cern.ch/schemas/definitions/atlas-workflows-no-circ-refs-v0.0.1.json"
+          "https://analysispreservation.cern.ch/schemas/deposits/common/deposit-v0.0.1.json"
       },
       "_files": {
         "$ref":
@@ -42,6 +42,10 @@
         "propertyOrder": 10,
         "type": "object",
         "properties": {
+          "abstract": {
+            "type": "string",
+            "title": "Abstract"
+          },
           "people_info": {
             "items": {
               "type": "object",
@@ -64,17 +68,13 @@
             "type": "array",
             "title": "People Involved"
           },
-          "abstract": {
+          "glance_id": {
             "type": "string",
-            "title": "Abstract"
+            "title": "Glance ID"
           },
           "analysis_title": {
             "type": "string",
             "title": "Analysis Title"
-          },
-          "glance_id": {
-            "type": "string",
-            "title": "Glance ID"
           }
         }
       },
@@ -88,9 +88,9 @@
         "$ref":
           "https://analysispreservation.cern.ch/schemas/deposits/common/access-v0.0.1.json"
       },
-      "_deposit": {
+      "workflows": {
         "$ref":
-          "https://analysispreservation.cern.ch/schemas/deposits/common/deposit-v0.0.1.json"
+          "https://analysispreservation.cern.ch/schemas/definitions/atlas-workflows-no-circ-refs-v0.0.1.json"
       },
       "$schema": {
         "type": "string"
@@ -110,7 +110,7 @@
         "type": "array",
         "id": "publications"
       }
-    },
-    "title": "ATLAS Analysis"
-  }
+    }
+  },
+  "deposit": true
 }

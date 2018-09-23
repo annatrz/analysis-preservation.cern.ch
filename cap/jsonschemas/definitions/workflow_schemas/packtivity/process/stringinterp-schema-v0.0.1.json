@@ -1,13 +1,16 @@
 {
   "fullname": "String Interpolated Command", 
   "experiment": null, 
-  "partial": true, 
   "jsonschema": {
     "title": "String Interpolated Command", 
     "required": [
       "process_type", 
       "cmd"
     ], 
+    "id": "string_interpolated", 
+    "additionalProperties": false, 
+    "$schema": "http://json-schema.org/draft-04/schema#", 
+    "type": "object", 
     "properties": {
       "cmd": {
         "type": "string", 
@@ -21,10 +24,7 @@
         "type": "string", 
         "title": "Process Type"
       }
-    }, 
-    "additionalProperties": false, 
-    "$schema": "http://json-schema.org/draft-04/schema#", 
-    "type": "object", 
-    "id": "string_interpolated"
-  }
+    }
+  }, 
+  "deposit": false
 }

@@ -1,9 +1,9 @@
 {
   "fullname": "Documentation", 
   "experiment": null, 
-  "partial": true, 
   "jsonschema": {
     "$schema": "http://json-schema.org/draft-04/schema#", 
+    "title": "Documentation", 
     "type": "object", 
     "description": "Add documentation", 
     "properties": {
@@ -19,7 +19,7 @@
         "type": "string", 
         "title": "Comment"
       }
-    }, 
-    "title": "Documentation"
-  }
+    }
+  }, 
+  "deposit": false
 }

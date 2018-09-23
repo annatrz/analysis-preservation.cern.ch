@@ -1,17 +1,14 @@
 {
   "fullname": "ATLAS Workflows", 
   "experiment": "ATLAS", 
-  "partial": true, 
   "jsonschema": {
     "$schema": "http://json-schema.org/draft-04/schema#", 
+    "title": "ATLAS Workflows", 
     "type": "object", 
     "id": "atlas_analyis", 
     "properties": {
       "inputs": {
         "$ref": "https://analysispreservation.cern.ch/schemas/definitions/atlas-analysis-input-files-v0.0.1.json"
-      }, 
-      "workflows": {
-        "$ref": "https://analysispreservation.cern.ch/schemas/definitions/atlas-workflows-no-circ-refs-v0.0.1.json"
       }, 
       "basic_info": {
         "type": "object", 
@@ -22,8 +19,11 @@
           }
         }, 
         "title": "Basic Info"
+      }, 
+      "workflows": {
+        "$ref": "https://analysispreservation.cern.ch/schemas/definitions/atlas-workflows-no-circ-refs-v0.0.1.json"
       }
-    }, 
-    "title": "ATLAS Workflows"
-  }
+    }
+  }, 
+  "deposit": false
 }

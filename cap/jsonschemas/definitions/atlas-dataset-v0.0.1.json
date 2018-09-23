@@ -1,9 +1,9 @@
 {
   "fullname": "ATLAS Dataset", 
   "experiment": "ATLAS", 
-  "partial": true, 
   "jsonschema": {
     "$schema": "http://json-schema.org/draft-04/schema#", 
+    "title": "ATLAS Dataset", 
     "type": "object", 
     "description": "Information concerning the ATLAS datasets used", 
     "properties": {
@@ -19,7 +19,7 @@
         "type": "string", 
         "title": "Data Format"
       }
-    }, 
-    "title": "ATLAS Dataset"
-  }
+    }
+  }, 
+  "deposit": false
 }

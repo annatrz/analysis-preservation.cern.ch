@@ -1,7 +1,6 @@
 {
   "fullname": null, 
   "experiment": "LHCb", 
-  "partial": true, 
   "jsonschema": {
     "stripping_turbo_selection": {
       "items": {
@@ -41,99 +40,6 @@
         }
       }, 
       "ui:array": "AccordionArrayField"
-    }, 
-    "user_analysis": {
-      "docker_registries": {
-        "items": {
-          "ui:field": "CapFiles"
-        }
-      }, 
-      "additional_repos": {
-        "items": {
-          "ui:field": "CapFiles"
-        }
-      }, 
-      "gitlab_links": {
-        "items": {
-          "ui:field": "CapFiles"
-        }
-      }, 
-      "ui:object": "accordionObjectField", 
-      "basic_scripts": {
-        "scripts": {
-          "items": {
-            "ui:field": "CapFiles"
-          }
-        }
-      }, 
-      "ui:order": [
-        "gitlab_links", 
-        "docker_registries", 
-        "additional_repos", 
-        "basic_scripts"
-      ]
-    }, 
-    "ui:order": [
-      "basic_info", 
-      "stripping_turbo_selection", 
-      "ntuple_userdst_production", 
-      "user_analysis", 
-      "additional_resources"
-    ], 
-    "additional_resources": {
-      "ui:object": "accordionObjectField", 
-      "presentations": {
-        "items": {
-          "ui:options": {
-            "stringify": [
-              "title"
-            ]
-          }, 
-          "ui:order": [
-            "title", 
-            "url", 
-            "meeting"
-          ]
-        }
-      }, 
-      "documentations": {
-        "items": {
-          "ui:options": {
-            "stringify": [
-              "title"
-            ]
-          }
-        }
-      }, 
-      "publications": {
-        "items": {
-          "ui:options": {
-            "stringify": [
-              "analysis_number"
-            ]
-          }
-        }
-      }, 
-      "ui:order": [
-        "internal_discussions", 
-        "presentations", 
-        "publications", 
-        "documentations"
-      ], 
-      "internal_discussions": {
-        "items": {
-          "ui:options": {
-            "stringify": [
-              "title"
-            ]
-          }, 
-          "ui:order": [
-            "title", 
-            "url", 
-            "meeting"
-          ]
-        }
-      }
     }, 
     "basic_info": {
       "ui:order": [
@@ -245,6 +151,100 @@
           }
         }
       }
+    }, 
+    "ui:order": [
+      "basic_info", 
+      "stripping_turbo_selection", 
+      "ntuple_userdst_production", 
+      "user_analysis", 
+      "additional_resources"
+    ], 
+    "additional_resources": {
+      "ui:object": "accordionObjectField", 
+      "presentations": {
+        "items": {
+          "ui:options": {
+            "stringify": [
+              "title"
+            ]
+          }, 
+          "ui:order": [
+            "title", 
+            "url", 
+            "meeting"
+          ]
+        }
+      }, 
+      "documentations": {
+        "items": {
+          "ui:options": {
+            "stringify": [
+              "title"
+            ]
+          }
+        }
+      }, 
+      "internal_discussions": {
+        "items": {
+          "ui:options": {
+            "stringify": [
+              "title"
+            ]
+          }, 
+          "ui:order": [
+            "title", 
+            "url", 
+            "meeting"
+          ]
+        }
+      }, 
+      "ui:order": [
+        "internal_discussions", 
+        "presentations", 
+        "publications", 
+        "documentations"
+      ], 
+      "publications": {
+        "items": {
+          "ui:options": {
+            "stringify": [
+              "analysis_number"
+            ]
+          }
+        }
+      }
+    }, 
+    "user_analysis": {
+      "gitlab_links": {
+        "items": {
+          "ui:field": "CapFiles"
+        }
+      }, 
+      "additional_repos": {
+        "items": {
+          "ui:field": "CapFiles"
+        }
+      }, 
+      "docker_registries": {
+        "items": {
+          "ui:field": "CapFiles"
+        }
+      }, 
+      "ui:object": "accordionObjectField", 
+      "basic_scripts": {
+        "scripts": {
+          "items": {
+            "ui:field": "CapFiles"
+          }
+        }
+      }, 
+      "ui:order": [
+        "gitlab_links", 
+        "docker_registries", 
+        "additional_repos", 
+        "basic_scripts"
+      ]
     }
-  }
+  }, 
+  "deposit": false
 }

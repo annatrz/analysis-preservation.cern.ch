@@ -206,6 +206,7 @@ def create_schema(db, es):
             schema = Schema(
                 fullpath=schema,
                 experiment=experiment,
+                is_deposit=True,
                 json=json or default_json
             )
             db.session.add(schema)

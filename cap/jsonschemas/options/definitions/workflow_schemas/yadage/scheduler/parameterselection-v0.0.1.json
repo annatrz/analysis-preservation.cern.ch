@@ -1,7 +1,6 @@
 {
   "fullname": "Parameters", 
   "experiment": null, 
-  "partial": true, 
   "jsonschema": {
     "items": [
       {
@@ -24,15 +23,15 @@
             "value": "1"
           }
         ], 
-        "placeholder": "Select sub-schema to use", 
         "type": "select", 
+        "placeholder": "Select sub-schema to use", 
         "key": "workflows[].workflow.stages[].scheduler.parameters[].value_type", 
         "title": "Parameter Type"
       }, 
       {
         "type": "string", 
-        "condition": "model['workflows'][arrayIndices[0]]['workflow']['stages'][arrayIndices[1]]['scheduler']['parameters'][arrayIndices[2]]['value_type'] == 0", 
-        "key": "workflows[].workflow.stages[].scheduler.parameters[].value"
+        "key": "workflows[].workflow.stages[].scheduler.parameters[].value", 
+        "condition": "model['workflows'][arrayIndices[0]]['workflow']['stages'][arrayIndices[1]]['scheduler']['parameters'][arrayIndices[2]]['value_type'] == 0"
       }, 
       {
         "items": [
@@ -58,12 +57,13 @@
           }
         ], 
         "type": "fieldset", 
-        "condition": "model['workflows'][arrayIndices[0]]['workflow']['stages'][arrayIndices[1]]['scheduler']['parameters'][arrayIndices[2]]['value_type'] == 1", 
-        "key": "workflows[].workflow.stages[].scheduler.parameters[].value"
+        "key": "workflows[].workflow.stages[].scheduler.parameters[].value", 
+        "condition": "model['workflows'][arrayIndices[0]]['workflow']['stages'][arrayIndices[1]]['scheduler']['parameters'][arrayIndices[2]]['value_type'] == 1"
       }
     ], 
     "type": "array", 
     "key": "workflows[].workflow.stages[].scheduler.parameters", 
     "title": "Parameters"
-  }
+  }, 
+  "deposit": false
 }

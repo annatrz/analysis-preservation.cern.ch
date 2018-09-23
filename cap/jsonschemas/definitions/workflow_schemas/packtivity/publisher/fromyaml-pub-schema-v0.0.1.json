@@ -1,13 +1,16 @@
 {
   "fullname": "YAML Publisher", 
   "experiment": null, 
-  "partial": true, 
   "jsonschema": {
     "title": "YAML Publisher", 
     "required": [
       "publisher_type", 
       "yamlfile"
     ], 
+    "id": "yaml_publisher", 
+    "additionalProperties": false, 
+    "$schema": "http://json-schema.org/draft-04/schema#", 
+    "type": "object", 
     "properties": {
       "publisher_type": {
         "default": "fromyaml-pub", 
@@ -20,10 +23,7 @@
         "type": "string", 
         "title": "YAML file"
       }
-    }, 
-    "additionalProperties": false, 
-    "$schema": "http://json-schema.org/draft-04/schema#", 
-    "type": "object", 
-    "id": "yaml_publisher"
-  }
+    }
+  }, 
+  "deposit": false
 }

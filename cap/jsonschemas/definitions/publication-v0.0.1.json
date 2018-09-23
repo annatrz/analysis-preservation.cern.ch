@@ -1,9 +1,9 @@
 {
   "fullname": "Internal Publication", 
   "experiment": null, 
-  "partial": true, 
   "jsonschema": {
     "$schema": "http://json-schema.org/draft-04/schema#", 
+    "title": "Internal Publication", 
     "type": "object", 
     "description": "Add publications", 
     "properties": {
@@ -34,7 +34,7 @@
         "type": "integer", 
         "title": "Journal Page"
       }
-    }, 
-    "title": "Internal Publication"
-  }
+    }
+  }, 
+  "deposit": false
 }

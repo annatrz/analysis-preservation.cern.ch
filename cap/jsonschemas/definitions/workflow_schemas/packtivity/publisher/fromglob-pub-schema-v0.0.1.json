@@ -1,7 +1,6 @@
 {
   "fullname": "Glob Publisher", 
   "experiment": null, 
-  "partial": true, 
   "jsonschema": {
     "title": "Glob Publisher", 
     "required": [
@@ -9,6 +8,10 @@
       "globexpression", 
       "outputkey"
     ], 
+    "id": "glob_publisher", 
+    "additionalProperties": false, 
+    "$schema": "http://json-schema.org/draft-04/schema#", 
+    "type": "object", 
     "properties": {
       "publisher_type": {
         "default": "fromglob-pub", 
@@ -23,10 +26,7 @@
       "globexpression": {
         "type": "string"
       }
-    }, 
-    "additionalProperties": false, 
-    "$schema": "http://json-schema.org/draft-04/schema#", 
-    "type": "object", 
-    "id": "glob_publisher"
-  }
+    }
+  }, 
+  "deposit": false
 }

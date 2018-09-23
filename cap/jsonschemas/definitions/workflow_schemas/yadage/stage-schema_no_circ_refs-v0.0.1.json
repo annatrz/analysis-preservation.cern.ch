@@ -1,13 +1,16 @@
 {
   "fullname": "Yadage Stage", 
   "experiment": null, 
-  "partial": true, 
   "jsonschema": {
     "title": "Yadage Stage", 
     "required": [
       "name", 
       "scheduler"
     ], 
+    "id": "yadage_stage", 
+    "additionalProperties": false, 
+    "$schema": "http://json-schema.org/draft-04/schema#", 
+    "type": "object", 
     "properties": {
       "dependencies": {
         "oneOf": [
@@ -37,10 +40,7 @@
         "type": "object", 
         "title": "Scheduler"
       }
-    }, 
-    "additionalProperties": false, 
-    "$schema": "http://json-schema.org/draft-04/schema#", 
-    "type": "object", 
-    "id": "yadage_stage"
-  }
+    }
+  }, 
+  "deposit": false
 }

@@ -1,7 +1,6 @@
 {
   "fullname": "Single Step Scheduler", 
   "experiment": null, 
-  "partial": true, 
   "jsonschema": {
     "oneOf": [
       {
@@ -29,6 +28,10 @@
     "required": [
       "scheduler_type"
     ], 
+    "id": "singlestep-stage", 
+    "additionalProperties": false, 
+    "$schema": "http://json-schema.org/draft-04/schema#", 
+    "type": "object", 
     "properties": {
       "step": {
         "$ref": "https://analysispreservation.cern.ch/schemas/definitions/workflow_schemas/packtivity/packtivity-schema-v0.0.1.json#"
@@ -46,10 +49,7 @@
       "workflow": {
         "$ref": "https://analysispreservation.cern.ch/schemas/definitions/workflow_schemas/yadage/workflow-schema-v0.0.1.json#"
       }
-    }, 
-    "additionalProperties": false, 
-    "$schema": "http://json-schema.org/draft-04/schema#", 
-    "type": "object", 
-    "id": "singlestep-stage"
-  }
+    }
+  }, 
+  "deposit": false
 }

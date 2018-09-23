@@ -1,7 +1,6 @@
 {
   "fullname": "Analysis", 
   "experiment": "ALICE", 
-  "partial": true, 
   "jsonschema": {
     "items": {
       "type": "object", 
@@ -31,9 +30,9 @@
           "type": "array", 
           "title": "Run"
         }, 
-        "dataset_aod": {
+        "train_id": {
           "type": "string", 
-          "title": "Dataset AOD"
+          "title": "Train ID"
         }, 
         "run_id": {
           "type": "string", 
@@ -69,14 +68,15 @@
           "type": "string", 
           "title": "Reference Production"
         }, 
-        "train_id": {
+        "dataset_aod": {
           "type": "string", 
-          "title": "Train ID"
+          "title": "Dataset AOD"
         }
       }
     }, 
     "$schema": "http://json-schema.org/draft-04/schema#", 
     "type": "array", 
     "title": "Analysis"
-  }
+  }, 
+  "deposit": false
 }

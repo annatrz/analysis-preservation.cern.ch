@@ -1,7 +1,6 @@
 {
   "fullname": "", 
   "experiment": "CMS", 
-  "partial": true, 
   "jsonschema": {
     "$schema": "http://json-schema.org/draft-04/schema#", 
     "type": "object", 
@@ -17,22 +16,22 @@
           "properties": {
             "configuration_file": {
               "x-cap-file": {}, 
-              "type": "string", 
               "placeholder": "E.g. my_job_config.py", 
-              "title": "Configuration File"
-            }, 
-            "output_data": {
-              "x-cap-file": {}, 
               "type": "string", 
-              "placeholder": "E.g. myfile-data.root", 
-              "title": "Output"
+              "title": "Configuration File"
             }, 
             "run_instructions": {
               "x-cap-file": {}, 
-              "type": "string", 
               "placeholder": "E.g. README.md", 
+              "type": "string", 
               "description": "Provide run instructions", 
               "title": "Run Instructions"
+            }, 
+            "output_data": {
+              "x-cap-file": {}, 
+              "placeholder": "E.g. myfile-data.root", 
+              "type": "string", 
+              "title": "Output"
             }
           }, 
           "title": "Step"
@@ -47,5 +46,6 @@
       }
     }, 
     "title": ""
-  }
+  }, 
+  "deposit": false
 }

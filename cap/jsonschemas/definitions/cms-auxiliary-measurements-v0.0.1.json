@@ -1,9 +1,9 @@
 {
   "fullname": "Detector State", 
   "experiment": "CMS", 
-  "partial": true, 
   "jsonschema": {
     "$schema": "http://json-schema.org/draft-04/schema#", 
+    "title": "Detector State", 
     "type": "object", 
     "description": "Information concerning the state of the detector", 
     "properties": {
@@ -164,14 +164,14 @@
                       "type": "string", 
                       "title": "Tag"
                     }, 
+                    "custom_tag": {
+                      "type": "string", 
+                      "title": " "
+                    }, 
                     "value": {
                       "pattern": "^[\\d\\.]+$", 
                       "type": "string", 
                       "title": "Value"
-                    }, 
-                    "custom_tag": {
-                      "type": "string", 
-                      "title": " "
                     }
                   }, 
                   "title": "Discriminator"
@@ -274,14 +274,14 @@
                       "type": "string", 
                       "title": "Tag"
                     }, 
+                    "custom_tag": {
+                      "type": "string", 
+                      "title": " "
+                    }, 
                     "value": {
                       "pattern": "^[\\d\\.]+$", 
                       "type": "string", 
                       "title": "Value"
-                    }, 
-                    "custom_tag": {
-                      "type": "string", 
-                      "title": " "
                     }
                   }, 
                   "title": "Discriminator"
@@ -296,17 +296,41 @@
                       "type": "string", 
                       "title": "Tag"
                     }, 
+                    "custom_tag": {
+                      "type": "string", 
+                      "title": " "
+                    }, 
                     "value": {
                       "pattern": "^[\\d\\.]+$", 
                       "type": "string", 
                       "title": "Value"
-                    }, 
-                    "custom_tag": {
-                      "type": "string", 
-                      "title": " "
                     }
                   }, 
                   "title": "Discriminator"
+                }, 
+                "met_pf_corrections": {
+                  "enum": [
+                    "Type0PFCorrections", 
+                    "Type1PFCorrections", 
+                    "Type2PFCorrections"
+                  ], 
+                  "type": "string", 
+                  "title": "MET Corrections"
+                }, 
+                "jet_corrections": {
+                  "enum": [
+                    "JetCorrections"
+                  ], 
+                  "type": "string", 
+                  "title": "Jet Corrections"
+                }, 
+                "met_type": {
+                  "enum": [
+                    "PFMET", 
+                    "CaloMET"
+                  ], 
+                  "type": "string", 
+                  "title": "MET type"
                 }, 
                 "object": {
                   "enum": [
@@ -324,30 +348,6 @@
                   ], 
                   "type": "string", 
                   "title": "Object"
-                }, 
-                "jet_corrections": {
-                  "enum": [
-                    "JetCorrections"
-                  ], 
-                  "type": "string", 
-                  "title": "Jet Corrections"
-                }, 
-                "met_type": {
-                  "enum": [
-                    "PFMET", 
-                    "CaloMET"
-                  ], 
-                  "type": "string", 
-                  "title": "MET type"
-                }, 
-                "met_pf_corrections": {
-                  "enum": [
-                    "Type0PFCorrections", 
-                    "Type1PFCorrections", 
-                    "Type2PFCorrections"
-                  ], 
-                  "type": "string", 
-                  "title": "MET Corrections"
                 }, 
                 "met_calo_corrections": {
                   "enum": [
@@ -368,14 +368,14 @@
                       "type": "string", 
                       "title": "Tag"
                     }, 
+                    "custom_tag": {
+                      "type": "string", 
+                      "title": " "
+                    }, 
                     "value": {
                       "pattern": "^[\\d\\.]+$", 
                       "type": "string", 
                       "title": "Value"
-                    }, 
-                    "custom_tag": {
-                      "type": "string", 
-                      "title": " "
                     }
                   }, 
                   "title": "Discriminator"
@@ -438,14 +438,14 @@
                       "type": "string", 
                       "title": "Tag"
                     }, 
+                    "custom_tag": {
+                      "type": "string", 
+                      "title": " "
+                    }, 
                     "value": {
                       "pattern": "^[\\d\\.]+$", 
                       "type": "string", 
                       "title": "Value"
-                    }, 
-                    "custom_tag": {
-                      "type": "string", 
-                      "title": " "
                     }
                   }, 
                   "title": "Discriminator"
@@ -466,14 +466,14 @@
                       "type": "string", 
                       "title": "Tag"
                     }, 
+                    "custom_tag": {
+                      "type": "string", 
+                      "title": " "
+                    }, 
                     "value": {
                       "pattern": "^[\\d\\.]+$", 
                       "type": "string", 
                       "title": "Value"
-                    }, 
-                    "custom_tag": {
-                      "type": "string", 
-                      "title": " "
                     }
                   }, 
                   "title": "Discriminator"
@@ -494,10 +494,43 @@
             "items": {
               "type": "object", 
               "properties": {
+                "invariant_mass": {
+                  "type": "object", 
+                  "properties": {
+                    "upper_range": {
+                      "pattern": "^[\\d\\.]+$", 
+                      "type": "string", 
+                      "title": ">"
+                    }, 
+                    "lower_range": {
+                      "type": "number", 
+                      "title": "<"
+                    }
+                  }, 
+                  "title": "GeV"
+                }, 
+                "relation_type": {
+                  "enum": [
+                    "charge", 
+                    "angle", 
+                    "invariant_mass", 
+                    "transverse_mass"
+                  ], 
+                  "type": "string", 
+                  "title": "Relation Type"
+                }, 
                 "physics_objects": {
                   "enum": [], 
                   "type": "string", 
                   "title": "Physics Objects Available"
+                }, 
+                "charge_relation": {
+                  "enum": [
+                    "same_sign", 
+                    "opposite_sign"
+                  ], 
+                  "type": "string", 
+                  "title": "Charge"
                 }, 
                 "angle_relation": {
                   "pattern": "^[\\d\\.]+$", 
@@ -519,39 +552,6 @@
                     }
                   }, 
                   "title": "GeV"
-                }, 
-                "charge_relation": {
-                  "enum": [
-                    "same_sign", 
-                    "opposite_sign"
-                  ], 
-                  "type": "string", 
-                  "title": "Charge"
-                }, 
-                "relation_type": {
-                  "enum": [
-                    "charge", 
-                    "angle", 
-                    "invariant_mass", 
-                    "transverse_mass"
-                  ], 
-                  "type": "string", 
-                  "title": "Relation Type"
-                }, 
-                "invariant_mass": {
-                  "type": "object", 
-                  "properties": {
-                    "upper_range": {
-                      "pattern": "^[\\d\\.]+$", 
-                      "type": "string", 
-                      "title": ">"
-                    }, 
-                    "lower_range": {
-                      "type": "number", 
-                      "title": "<"
-                    }
-                  }, 
-                  "title": "GeV"
                 }
               }
             }, 
@@ -561,7 +561,7 @@
         }, 
         "title": "Event Selection"
       }
-    }, 
-    "title": "Detector State"
-  }
+    }
+  }, 
+  "deposit": false
 }

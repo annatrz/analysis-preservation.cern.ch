@@ -1,9 +1,12 @@
 {
   "fullname": "JSONPath ready predicate", 
   "experiment": null, 
-  "partial": true, 
   "jsonschema": {
     "title": "JSONPath ready predicate", 
+    "id": "jsonpath_ready", 
+    "additionalProperties": false, 
+    "$schema": "http://json-schema.org/draft-04/schema#", 
+    "type": "object", 
     "properties": {
       "dependency_type": {
         "default": "jsonpath_ready", 
@@ -16,10 +19,7 @@
       "expressions": {
         "type": "array"
       }
-    }, 
-    "additionalProperties": false, 
-    "$schema": "http://json-schema.org/draft-04/schema#", 
-    "type": "object", 
-    "id": "jsonpath_ready"
-  }
+    }
+  }, 
+  "deposit": false
 }

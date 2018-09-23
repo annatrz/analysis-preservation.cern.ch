@@ -1,13 +1,16 @@
 {
   "fullname": "Constant Publisher", 
   "experiment": null, 
-  "partial": true, 
   "jsonschema": {
     "title": "Constant Publisher", 
     "required": [
       "publisher_type", 
       "publish"
     ], 
+    "id": "constant_publisher", 
+    "additionalProperties": false, 
+    "$schema": "http://json-schema.org/draft-04/schema#", 
+    "type": "object", 
     "properties": {
       "publisher_type": {
         "default": "constant-pub", 
@@ -19,10 +22,7 @@
       "publish": {
         "type": "object"
       }
-    }, 
-    "additionalProperties": false, 
-    "$schema": "http://json-schema.org/draft-04/schema#", 
-    "type": "object", 
-    "id": "constant_publisher"
-  }
+    }
+  }, 
+  "deposit": false
 }

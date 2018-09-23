@@ -1,13 +1,16 @@
 {
   "fullname": "Parameter Publisher", 
   "experiment": null, 
-  "partial": true, 
   "jsonschema": {
     "title": "Parameter Publisher", 
     "required": [
       "publisher_type", 
       "outputmap"
     ], 
+    "id": "parameter_publisher", 
+    "additionalProperties": false, 
+    "$schema": "http://json-schema.org/draft-04/schema#", 
+    "type": "object", 
     "properties": {
       "publisher_type": {
         "default": "frompar-pub", 
@@ -19,10 +22,7 @@
       "outputmap": {
         "type": "object"
       }
-    }, 
-    "additionalProperties": false, 
-    "$schema": "http://json-schema.org/draft-04/schema#", 
-    "type": "object", 
-    "id": "parameter_publisher"
-  }
+    }
+  }, 
+  "deposit": false
 }
