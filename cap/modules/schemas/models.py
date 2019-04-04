@@ -29,8 +29,8 @@ import re
 from flask import current_app
 from invenio_access.models import ActionSystemRoles
 from invenio_access.permissions import authenticated_user
-from invenio_jsonschemas.errors import JSONSchemaNotFound
 from invenio_db import db
+from invenio_jsonschemas.errors import JSONSchemaNotFound
 from invenio_search import current_search
 from invenio_search import current_search_client as es
 from sqlalchemy import UniqueConstraint, event
@@ -49,6 +49,7 @@ class Schema(db.Model):
 
     name = db.Column(db.String(128), unique=False, nullable=False)
     fullname = db.Column(db.String(128), unique=False, nullable=True)
+    a = db.Column(db.String(128), unique=False, nullable=True)
 
     # version
     major = db.Column(db.Integer, unique=False, nullable=False, default=0)
