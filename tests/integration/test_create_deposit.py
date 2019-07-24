@@ -29,8 +29,9 @@ from __future__ import absolute_import, print_function
 
 import json
 
-from pytest import mark, raises
+from cap.modules.schemas.models import Schema
 from invenio_jsonschemas.errors import JSONSchemaNotFound
+from pytest import mark, raises
 
 
 #######################
@@ -52,12 +53,10 @@ def test_create_deposit_when_user_is_member_of_schema_experiment_can_create_depo
                                                                                     create_schema):
     user = users['cms_user']
     other_user = users['lhcb_user']
-    schema = create_schema('deposits/records/cms-v0.0.0',
-                           experiment='CMS')
+    schema = create_schema('cms', experiment='CMS')
     metadata = {
-        '$schema': 'https://{}/schemas/deposits/records/cms-v0.0.0.json'.format(
-            jsonschemas_host),
-    }
+        '$schema': 'http://analysispreservation.cern.ch/schemas/deposits/records/cms-v1.0.0.json'}
+
     with app.test_client() as client:
         resp = client.post('/deposits/', data=json.dumps(metadata),
                            headers=auth_headers_for_user(user) + json_headers)
@@ -78,12 +77,9 @@ def test_create_deposit_when_user_is_member_of_egroup_that_has_read_access_to_sc
                                                                                                         auth_headers_for_user,
                                                                                                         create_schema):
     user = users['lhcb_user']
-    schema = create_schema('deposits/records/cms-v0.0.0',
-                           experiment='LHCb')
-    metadata = {
-        '$schema': 'https://{}/schemas/deposits/records/cms-v0.0.0.json'.format(
-            jsonschemas_host),
-    }
+    schema = create_schema('cms', experiment='LHCb')
+    metadata = {'$ana_type': 'cms'}
+
     with app.test_client() as client:
         resp = client.post('/deposits/', data=json.dumps(metadata),
                            headers=auth_headers_for_user(user) + json_headers)
@@ -99,12 +95,8 @@ def test_create_deposit_when_user_has_no_permission_to_schema_returns_403(app,
                                                                           auth_headers_for_user,
                                                                           create_schema):
     user = users['cms_user']
-    schema = create_schema('deposits/records/test-v1.0.1',
-                           experiment='ALICE')
-    metadata = {
-        '$schema': 'https://{}/schemas/deposits/records/test-v1.0.1.json'.format(
-            jsonschemas_host),
-    }
+    schema = create_schema('test', experiment='ALICE')
+    metadata = {'$ana_type': 'test'}
 
     with app.test_client() as client:
         resp = client.post('/deposits/', data=json.dumps(metadata),
@@ -119,11 +111,8 @@ def test_create_deposit_when_superuser_can_create_deposit(app,
                                                           jsonschemas_host,
                                                           auth_headers_for_superuser,
                                                           json_headers):
-    schema = create_schema('deposits/records/test-analysis-v1.0.0')
-    metadata = {
-        '$schema': 'https://{}/schemas/deposits/records/test-analysis-v1.0.0.json'.format(
-            jsonschemas_host),
-    }
+    schema = create_schema('test-analysis')
+    metadata = {'$ana_type': 'test-analysis'}
 
     with app.test_client() as client:
         resp = client.post('/deposits/', headers=auth_headers_for_superuser + json_headers,
@@ -134,15 +123,12 @@ def test_create_deposit_when_superuser_can_create_deposit(app,
 
 def test_create_deposit_when_passed_non_existing_schema_returns_404(app,
                                                                     location,
-                                                                    create_schema,
                                                                     jsonschemas_host,
                                                                     auth_headers_for_superuser,
                                                                     json_headers):
     schema = 'https://{}/schemas/non-existing-schema-v1.0.0.json'.format(
         jsonschemas_host)
-    metadata = {
-        '$schema': schema
-    }
+    metadata = {'$schema': schema}
 
     with app.test_client() as client:
         resp = client.post('/deposits/', headers=auth_headers_for_superuser + json_headers,
@@ -154,15 +140,11 @@ def test_create_deposit_when_passed_non_existing_schema_returns_404(app,
 
 def test_create_deposit_when_passed_non_existing_ana_type_returns_400(app,
                                                                       location,
-                                                                      create_schema,
                                                                       jsonschemas_host,
                                                                       auth_headers_for_superuser,
                                                                       json_headers):
     ana_type = 'cms-analysis'
-
-    metadata = {
-        '$ana_type': ana_type
-    }
+    metadata = {'$ana_type': 'cms-analysis'}
 
     with app.test_client() as client:
         resp = client.post('/deposits/', headers=auth_headers_for_superuser + json_headers,
@@ -175,7 +157,6 @@ def test_create_deposit_when_passed_non_existing_ana_type_returns_400(app,
 
 def test_create_deposit_when_passed_empty_data_returns_400(app,
                                                            location,
-                                                           create_schema,
                                                            jsonschemas_host,
                                                            auth_headers_for_superuser,
                                                            json_headers):
@@ -194,8 +175,9 @@ def test_create_deposit_when_passed_ana_type_creates_deposit_with_latest_version
                                                                                              jsonschemas_host,
                                                                                              auth_headers_for_superuser,
                                                                                              json_headers):
-    create_schema('deposits/records/test-analysis-v1.0.0')
-    latest = create_schema('deposits/records/test-analysis-v2.0.0')
+    create_schema('test-analysis')
+    create_schema('test-analysis', version='1.0.0')
+    latest = create_schema('test-analysis', version='2.0.0')
     metadata = {'$ana_type': 'test-analysis'}
 
     with app.test_client() as client:
@@ -204,7 +186,7 @@ def test_create_deposit_when_passed_ana_type_creates_deposit_with_latest_version
                            data=json.dumps(metadata))
 
         assert resp.status_code == 201
-        assert resp.json['metadata']['$schema'] == latest.fullpath
+        assert resp.json['metadata']['$schema'] == 'https://analysispreservation.cern.ch/schemas/deposits/records/test-analysis-v2.0.0.json'
 
 
 def test_create_deposit_set_fields_correctly(app,
@@ -215,11 +197,10 @@ def test_create_deposit_set_fields_correctly(app,
                                              auth_headers_for_user,
                                              json_headers):
     owner = users['cms_user']
-    schema = create_schema('deposits/records/test-analysis-v1.0.0',
+    schema = create_schema('test-analysis',
                            experiment='CMS')
     metadata = {
-        '$schema': 'https://{}/schemas/deposits/records/test-analysis-v1.0.0.json'.format(
-            jsonschemas_host)
+        '$schema': 'https://analysispreservation.cern.ch/schemas/deposits/records/test-analysis-v1.0.0.json'
     }
 
     with app.test_client() as client:
@@ -231,7 +212,7 @@ def test_create_deposit_set_fields_correctly(app,
         created = resp.json['metadata']
 
         assert created['_deposit']['created_by'] == owner.id
-        assert created['$schema'] == schema.fullpath
+        assert created['$schema'] == 'https://analysispreservation.cern.ch/schemas/deposits/records/test-analysis-v1.0.0.json'
         assert created['_experiment'] == 'CMS'
         assert created['_deposit']['status'] == 'draft'
 
@@ -243,8 +224,7 @@ def test_create_deposit_when_schema_with_refs_works_correctly(app,
                                                               jsonschemas_host,
                                                               auth_headers_for_user,
                                                               json_headers):
-    owner = users['cms_user']
-    nested_schema = create_schema('nested-schema-v0.0.0', json={
+    nested_schema = create_schema('nested-schema', experiment='CMS', deposit_schema={
         'type': 'object',
         'properties': {
             'title': {
@@ -252,22 +232,21 @@ def test_create_deposit_when_schema_with_refs_works_correctly(app,
             }
         }
     })
-    nested_schema.add_read_access_to_all()
-    schema = create_schema('deposits/records/test-analysis-v1.0.0',
+    schema = create_schema('test-analysis',
                            experiment='CMS',
-                           json={
+                           deposit_schema={
                                'type': 'object',
                                'properties': {
                                    'nested': {
-                                       '$ref': nested_schema.fullpath,
+                                       '$ref': 'https://analysispreservation.cern.ch/schemas/deposits/records/nested-schema-v1.0.0.json'
                                    }
                                }
                            })
 
     with app.test_client() as client:
-        resp = client.post('/deposits/', headers=auth_headers_for_user(owner) + json_headers,
+        resp = client.post('/deposits/', headers=auth_headers_for_user(users['cms_user']) + json_headers,
                            data=json.dumps({
-                               '$schema': schema.fullpath,
+                               '$schema': 'https://analysispreservation.cern.ch/schemas/deposits/records/nested-schema-v1.0.0.json',
                                'nested': {
                                    'title': 'nested'
                                }
