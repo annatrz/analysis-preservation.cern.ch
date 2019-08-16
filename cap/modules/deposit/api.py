@@ -51,7 +51,6 @@ from werkzeug.local import LocalProxy
 from cap.modules.deposit.utils import download_from_git, name_git_record
 from cap.modules.experiments.permissions import exp_need_factory
 from cap.modules.records.api import CAPRecord
-from cap.modules.repoimporter.repo_importer import RepoImporter
 from cap.modules.repoimporter.utils import parse_url
 from cap.modules.schemas.models import Schema
 from cap.modules.schemas.resolvers import (resolve_schema_by_url,
