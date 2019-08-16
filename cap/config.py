@@ -5,7 +5,6 @@
 # CERN Analysis Preservation is free software; you can redistribute it
 # and/or modify it under the terms of the MIT License; see LICENSE file
 # for more details.
-
 """Default configuration for CERN Analysis Preservation."""
 
 from __future__ import absolute_import, print_function
@@ -16,15 +15,6 @@ from datetime import timedelta
 from os.path import dirname, join
 
 from flask import request
-
-from cap.modules.deposit.permissions import (AdminDepositPermission,
-                                             CreateDepositPermission,
-                                             ReadDepositPermission)
-from cap.modules.oauthclient.contrib.cern import disconnect_handler
-from cap.modules.oauthclient.rest_handlers import (authorized_signup_handler,
-                                                   signup_handler)
-from cap.modules.records.permissions import ReadRecordPermission
-from cap.modules.search.facets import nested_filter
 from flask_principal import RoleNeed
 from invenio_deposit import config as deposit_config
 from invenio_deposit.config import DEPOSIT_REST_SORT_OPTIONS
@@ -38,6 +28,15 @@ from invenio_records_rest.facets import terms_filter
 from invenio_records_rest.utils import allow_all, deny_all
 from jsonresolver import JSONResolver
 from jsonresolver.contrib.jsonref import json_loader_factory
+
+from cap.modules.deposit.permissions import (AdminDepositPermission,
+                                             CreateDepositPermission,
+                                             ReadDepositPermission)
+from cap.modules.oauthclient.contrib.cern import disconnect_handler
+from cap.modules.oauthclient.rest_handlers import (authorized_signup_handler,
+                                                   signup_handler)
+from cap.modules.records.permissions import ReadRecordPermission
+from cap.modules.search.facets import nested_filter
 
 
 def _(x):
@@ -57,9 +56,7 @@ BABEL_DEFAULT_LANGUAGE = 'en'
 #: Default time zone
 BABEL_DEFAULT_TIMEZONE = 'Europe/Zurich'
 #: Other supported languages (do not include the default language in list).
-I18N_LANGUAGES = [
-    ('fr', _('French'))
-]
+I18N_LANGUAGES = [('fr', _('French'))]
 
 # Email configuration
 # ===================
@@ -80,8 +77,7 @@ SECURITY_SEND_REGISTER_EMAIL = False
 #: Email address used as sender of account registration emails.
 SECURITY_EMAIL_SENDER = SUPPORT_EMAIL
 #: Email subject for account registration emails.
-SECURITY_EMAIL_SUBJECT_REGISTER = _(
-    "Welcome to CERN Analysis Preservation!")
+SECURITY_EMAIL_SUBJECT_REGISTER = _("Welcome to CERN Analysis Preservation!")
 #: Redis session storage URL.
 ACCOUNTS_SESSION_REDIS_URL = 'redis://localhost:6379/1'
 
@@ -113,13 +109,16 @@ CELERY_BEAT_SCHEDULE = {
 #: Database URI including user and password
 SQLALCHEMY_DATABASE_URI = os.environ.get(
     'APP_SQLALCHEMY_DATABASE_URI',
-    'postgresql+psycopg2://cap:cap@localhost/cap'
-)
+    'postgresql+psycopg2://cap:cap@localhost/cap')
 
 # JSONSchemas
 # ===========
 #: Hostname used in URLs for local JSONSchemas.
 JSONSCHEMAS_HOST = 'analysispreservation.cern.ch'
+
+SCHEMAS_DEPOSIT_PREFIX = 'deposits/records/'
+SCHEMAS_RECORD_PREFIX = 'records/'
+SCHEMAS_OPTIONS_PREFIX = 'options/'
 
 # Flask configuration
 # ===================
@@ -138,19 +137,14 @@ SESSION_COOKIE_SECURE = False
 #: should be set to the correct host and it is strongly recommended to only
 #: route correct hosts to the application.
 APP_ALLOWED_HOSTS = [
-    'localhost',
-    'analysispreservation.web.cern.ch',
-    'analysispreservation.cern.ch',
-    'analysispreservation-dev.web.cern.ch',
-    'analysispreservation-dev.cern.ch',
-    'analysispreservation-qa.web.cern.ch',
+    'localhost', 'analysispreservation.web.cern.ch',
+    'analysispreservation.cern.ch', 'analysispreservation-dev.web.cern.ch',
+    'analysispreservation-dev.cern.ch', 'analysispreservation-qa.web.cern.ch',
     'analysispreservation-qa.cern.ch'
 ]
 
-
 if os.environ.get('DEV_HOST', False):
     APP_ALLOWED_HOSTS.append(os.environ.get('DEV_HOST'))
-
 
 # OAI-PMH
 # =======
@@ -165,11 +159,9 @@ OAISERVER_ID_PREFIX = 'oai:analysispreservation.cern.ch:'
 #: Switches off incept of redirects by Flask-DebugToolbar.
 DEBUG_TB_INTERCEPT_REDIRECTS = False
 
-
 # =======================================================================
 # =======================================================================
 # =======================================================================
-
 
 DEBUG_MODE = os.environ.get('DEBUG_MODE', False)
 if DEBUG_MODE == 'True':
@@ -180,7 +172,6 @@ else:
 if DEBUG:
     REST_ENABLE_CORS = True
     APP_ENABLE_SECURE_HEADERS = False
-
 
 # Path to app root dir
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -196,8 +187,9 @@ CACHE_REDIS_PORT = 6379
 #: DB
 CACHE_REDIS_DB = 0
 #: URL of Redis db.
-CACHE_REDIS_URL = "redis://{0}:{1}/{2}".format(
-    CACHE_REDIS_HOST, CACHE_REDIS_PORT, CACHE_REDIS_DB)
+CACHE_REDIS_URL = "redis://{0}:{1}/{2}".format(CACHE_REDIS_HOST,
+                                               CACHE_REDIS_PORT,
+                                               CACHE_REDIS_DB)
 #: Default cache type.
 CACHE_TYPE = "redis"
 #: Default cache URL for sessions.
@@ -216,21 +208,19 @@ SUPERUSER_EGROUPS = [
 # Records
 # =======
 #: Records sort/facets options
-RECORDS_REST_SORT_OPTIONS = dict(
-    records=dict(
-        bestmatch=dict(
-            title=_('Best match'),
-            fields=['_score'],
-            order=1,
-        ),
-        mostrecent=dict(
-            title=_('Most recent'),
-            fields=['_updated'],
-            default_order='desc',
-            order=2,
-        ),
-    )
-)
+RECORDS_REST_SORT_OPTIONS = dict(records=dict(
+    bestmatch=dict(
+        title=_('Best match'),
+        fields=['_score'],
+        order=1,
+    ),
+    mostrecent=dict(
+        title=_('Most recent'),
+        fields=['_updated'],
+        default_order='desc',
+        order=2,
+    ),
+))
 RECORDS_REST_SORT_OPTIONS.update(DEPOSIT_REST_SORT_OPTIONS)
 
 #: Record search facets.
@@ -301,8 +291,7 @@ RECORDS_REST_FACETS = {
             'physics_objects': nested_filter(
                 'main_measurements.signal_event_selection.physics_objects',
                 'main_measurements.signal_event_selection'
-                '.physics_objects.object'
-            ),
+                '.physics_objects.object'),
             'physics_objects_type': nested_filter(
                 'main_measurements.signal_event_selection.physics_objects',
                 'main_measurements.signal_event_selection.physics_objects'
@@ -368,8 +357,7 @@ RECORDS_REST_FACETS = {
             'physics_objects': nested_filter(
                 'main_measurements.signal_event_selection.physics_objects',
                 'main_measurements.signal_event_selection'
-                '.physics_objects.object'
-            ),
+                '.physics_objects.object'),
             'physics_objects_type': nested_filter(
                 'main_measurements.signal_event_selection.physics_objects',
                 'main_measurements.signal_event_selection.physics_objects'
@@ -385,7 +373,7 @@ RECORDS_REST_ENDPOINTS['recid'].update({
     'pid_fetcher': 'cap_record_fetcher',
     'search_class': 'cap.modules.records.search:CAPRecordSearch',
     'search_factory_imp': 'cap.modules.search.query'
-    ':cap_search_factory',
+                          ':cap_search_factory',
     'record_serializers': {
         'application/json': ('cap.modules.records.serializers'
                              ':json_v1_response'),
@@ -399,8 +387,7 @@ RECORDS_REST_ENDPOINTS['recid'].update({
                                    ':basic_json_v1_search'),
     },
     'read_permission_factory_imp': check_oauth2_scope(
-        lambda record: ReadRecordPermission(record).can(),
-        write_scope.id),
+        lambda record: ReadRecordPermission(record).can(), write_scope.id),
 })
 
 #: Default api endpoint for LHCb db
@@ -460,11 +447,9 @@ else:
     es_params = {}
 
 SEARCH_ELASTIC_HOSTS = [
-    dict(
-        host=os.environ.get('ELASTICSEARCH_HOST', 'localhost'),
-        port=int(os.environ.get('ELASTICSEARCH_PORT', '9200')),
-        **es_params
-    )
+    dict(host=os.environ.get('ELASTICSEARCH_HOST', 'localhost'),
+         port=int(os.environ.get('ELASTICSEARCH_PORT', '9200')),
+         **es_params)
 ]
 
 # Admin
@@ -482,18 +467,16 @@ CERN_APP_CREDENTIALS = {
 
 # Update CERN OAuth handlers - due to REST - mostly only redirect urls
 # and error flashing
-CERN_REMOTE_APP.update(dict(
-    authorized_handler=authorized_signup_handler,
-    disconnect_handler=disconnect_handler,
-))
+CERN_REMOTE_APP.update(
+    dict(
+        authorized_handler=authorized_signup_handler,
+        disconnect_handler=disconnect_handler,
+    ))
 
 CERN_REMOTE_APP['signup_handler']['view'] = signup_handler
 
 #: Defintion of OAuth client applications.
-OAUTHCLIENT_REMOTE_APPS = dict(
-    cern=CERN_REMOTE_APP,
-)
-
+OAUTHCLIENT_REMOTE_APPS = dict(cern=CERN_REMOTE_APP, )
 
 # JSON Schemas
 # ============
@@ -503,18 +486,10 @@ JSONSCHEMAS_ENDPOINT = '/schemas'
 
 JSONSCHEMAS_RESOLVE_SCHEMA = True
 
-JSONSCHEMAS_LOADER_CLS = json_loader_factory(JSONResolver(
-    plugins=[
-        'cap.modules.records.resolvers.local',
-        'cap.modules.records.resolvers.cap',
-    ],
-))
-
-JSONSCHEMAS_ROOT = os.path.join(APP_ROOT, 'jsonschemas')
-
-# directories with jsonschemas
-JSONSCHEMAS_DEPOSIT_DIR = 'deposits/records/'
-JSONSCHEMAS_RECORDS_DIR = 'records/'
+JSONSCHEMAS_LOADER_CLS = json_loader_factory(
+    JSONResolver(plugins=[
+        'cap.modules.schemas.resolvers',
+    ], ))
 
 # WARNING: Do not share the secret key - especially do not commit it to
 # version control.
@@ -580,16 +555,12 @@ DEPOSIT_REST_ENDPOINTS['depid'].update({
         'application/json-patch+json': lambda: request.get_json(force=True),
     },
     'record_serializers': {
-        'application/json': (
-            'cap.modules.records.serializers'
-            ':json_v1_response'),
-        'application/basic+json': (
-            'cap.modules.records.serializers'
-            ':basic_json_v1_response'),
-        'application/permissions+json': (
-            'cap.modules.records.serializers'
-            ':permissions_json_v1_response'
-        )
+        'application/json': ('cap.modules.records.serializers'
+                             ':json_v1_response'),
+        'application/basic+json': ('cap.modules.records.serializers'
+                                   ':basic_json_v1_response'),
+        'application/permissions+json': ('cap.modules.records.serializers'
+                                         ':permissions_json_v1_response')
     },
     'search_serializers': {
         'application/json': ('cap.modules.records.serializers'
@@ -598,27 +569,23 @@ DEPOSIT_REST_ENDPOINTS['depid'].update({
                                    ':basic_json_v1_search')
     },
     'files_serializers': {
-        'application/json': (
-            'cap.modules.records.serializers'
-            ':deposit_v1_files_response'),
+        'application/json': ('cap.modules.records.serializers'
+                             ':deposit_v1_files_response'),
     },
     'search_class': 'cap.modules.deposit.search:CAPDepositSearch',
     'search_factory_imp': 'cap.modules.search.query'
-    ':cap_search_factory',
+                          ':cap_search_factory',
     'item_route': '/deposits/<{0}:pid_value>'.format(_PID),
     'file_list_route': '/deposits/<{0}:pid_value>/files'.format(_PID),
     'file_item_route':
-    '/deposits/<{0}:pid_value>/files/<path:key>'.format(_PID),
+        '/deposits/<{0}:pid_value>/files/<path:key>'.format(_PID),
     'create_permission_factory_imp': check_oauth2_scope(
-        lambda record: CreateDepositPermission(record).can(),
-        write_scope.id),
+        lambda record: CreateDepositPermission(record).can(), write_scope.id),
     'read_permission_factory_imp': check_oauth2_scope(
-        lambda record: ReadDepositPermission(record).can(),
-        write_scope.id),
+        lambda record: ReadDepositPermission(record).can(), write_scope.id),
     'update_permission_factory_imp': allow_all,
     'delete_permission_factory_imp': check_oauth2_scope(
-        lambda record: AdminDepositPermission(record).can(),
-        write_scope.id),
+        lambda record: AdminDepositPermission(record).can(), write_scope.id),
     'links_factory_imp': 'cap.modules.deposit.links:links_factory',
 })
 
@@ -645,10 +612,8 @@ INDEXER_REPLACE_REFS = False
 # LHCB DB files location
 # ======================
 LHCB_DB_FILES_LOCATION = os.environ.get(
-    'APP_LHCB_FILES_LOCATION', os.path.join(
-        APP_ROOT,
-        'modules/experiments/static/example_lhcb/'
-    ))
+    'APP_LHCB_FILES_LOCATION',
+    os.path.join(APP_ROOT, 'modules/experiments/static/example_lhcb/'))
 
 # Disable JWT token
 ACCOUNTS_JWT_ENABLE = False
@@ -668,10 +633,7 @@ REANA_ACCESS_TOKEN = {
 }
 
 # Keytabs
-KEYTABS_LOCATION = os.environ.get(
-    'APP_KEYTABS_LOCATION',
-    '/etc/keytabs'
-)
+KEYTABS_LOCATION = os.environ.get('APP_KEYTABS_LOCATION', '/etc/keytabs')
 
 KRB_PRINCIPALS = {
     'CADI': (CMS_USER_PRINCIPAL, CMS_USER_KEYTAB),
@@ -681,10 +643,7 @@ CERN_CERTS_PEM = os.environ.get('APP_CERN_CERTS_PEM')
 
 # Zenodo
 # ======
-ZENODO_SERVER_URL = os.environ.get(
-    'APP_ZENODO_SERVER_URL',
-    'https://zenodo.org/api')
+ZENODO_SERVER_URL = os.environ.get('APP_ZENODO_SERVER_URL',
+                                   'https://zenodo.org/api')
 
-ZENODO_ACCESS_TOKEN = os.environ.get(
-    'APP_ZENODO_ACCESS_TOKEN',
-    'CHANGE_ME')
+ZENODO_ACCESS_TOKEN = os.environ.get('APP_ZENODO_ACCESS_TOKEN', 'CHANGE_ME')

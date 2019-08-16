@@ -25,34 +25,35 @@
 """Utils for Schemas module."""
 
 from invenio_db import db
-
 from invenio_jsonschemas.errors import JSONSchemaNotFound
+
 from .models import Schema
+from .permissions import ReadSchemaPermission
 
 
-def add_or_update_schema(fullpath=None, data=None):
-    """Add or update schema by fullpath, e.g. records/ana1-v0.0.1.json."""
+def add_schema_from_fixture(data=None):
+    """Add or update schema."""
+    allow_all = data.pop("allow_all", False)
+    name = data['name']
+
     try:
-        schema = Schema.get_by_fullpath(fullpath)
-        schema.experiment = data.get('experiment', None)
-        schema.fullname = data.get('fullname', None)
-        schema.is_deposit = data.get('is_deposit', False)
-        schema.json = data['jsonschema']
-
-        print('{} updated.'.format(fullpath))
+        schema = Schema.get(name=data['name'], version=data['version'])
+        print('{} already exist.'.format(name))
 
     except JSONSchemaNotFound:
-        schema = Schema(fullpath=fullpath,
-                        experiment=data.get('experiment', None),
-                        fullname=data.get('fullname', None),
-                        is_deposit=data.get('is_deposit', False),
-                        json=data['jsonschema'])
-
+        schema = Schema(**data)
         db.session.add(schema)
 
-        print('{} added.'.format(fullpath))
+        print('{} added.'.format(name))
 
-    if data.get("allow_all", False):
-        schema.add_read_access_to_all()
+        if allow_all:
+            schema.add_read_access_for_all_users()
 
     db.session.commit()
+
+
+def get_schemas_for_user():
+    """Return all indexed schemas current user has read access to."""
+    schemas = Schema.query.filter_by(is_indexed=True).all()
+
+    return [x for x in schemas if ReadSchemaPermission(x).can()]

@@ -22,7 +22,6 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 # or submit itself to any jurisdiction.
-
 """Integration tests for CAP api."""
 import json
 
@@ -30,30 +29,52 @@ import json
 ##########
 # api/me
 ##########
-def test_me_when_user_not_logged_in_returns_401(app):
-    with app.test_client() as client:
-        resp = client.get('/me')
+def test_me_when_user_not_logged_in_returns_401(client):
+    resp = client.get('/me')
 
-        assert resp.status_code == 401
+    assert resp.status_code == 401
 
 
-#def test_me_when_superuser_returns_correct_user_data(app,
-#                                                     auth_headers_for_superuser,
-#                                                     superuser_me_data):
-#    with app.test_client() as client:
-#        resp = client.get('/me',
-#                          headers=auth_headers_for_superuser)
-#
-#        assert resp.status_code == 200
-#        assert json.loads(resp.data) == superuser_me_data
-#
-#
-#def test_me_when_cms_user_returns_correct_user_data(app, users,
-#                                                    auth_headers_for_user,
-#                                                    cms_user_me_data):
-#    with app.test_client() as client:
-#        user_headers = auth_headers_for_user(users['cms_user'])
-#        resp = client.get('/me',
-#                          headers=user_headers)
-#
-#        assert json.loads(resp.data) == cms_user_me_data
+def test_me_when_superuser_returns_correct_user_data(
+        client, create_schema, superuser, auth_headers_for_superuser):
+    create_schema('cms', fullname='CMS analysis', experiment='CMS')
+    create_schema('lhcb', fullname='LHCb analysis', experiment='LHCb')
+
+    resp = client.get('/me', headers=auth_headers_for_superuser)
+
+    assert resp.status_code == 200
+    assert json.loads(resp.data) == {
+        "deposit_groups": [{
+            "deposit_group": "cms",
+            "name": 'CMS analysis'
+        }, {
+            "deposit_group": "lhcb",
+            "name": 'LHCb analysis'
+        }],
+        "email":
+        superuser.email,
+        "id":
+        superuser.id
+    }
+
+
+def test_me_when_cms_user_returns_correct_user_data(client, create_schema,
+                                                    users,
+                                                    auth_headers_for_user):
+    user = users['cms_user']
+    create_schema('cms', fullname='CMS analysis', experiment='CMS')
+    create_schema('lhcb', fullname='LHCb analysis', experiment='LHCb')
+    create_schema('alice', fullname='Alice analysis', experiment='Alice')
+    create_schema('atlas', fullname='ATLAS analysis', experiment='ATLAS')
+
+    resp = client.get('/me', headers=auth_headers_for_user(user))
+
+    assert resp.status_code == 200
+    assert json.loads(resp.data) == {
+        "deposit_groups": [{
+            "deposit_group": "cms",
+            "name": 'CMS analysis'
+        }],
+        "email": user.email,
+        "id": user.id
+    }

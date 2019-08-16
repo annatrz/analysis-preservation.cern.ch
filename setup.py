@@ -81,19 +81,19 @@ install_requires = [
     # temporary pinned since there are 'fs' conslicts between
     # 'reana-commons' and 'invenio-files-rest'
     'fs==0.5.4',
+    'invenio==3.0.0',
     'invenio-accounts-rest>=1.0.0a4',
     'invenio-oauthclient>=1.0.0',
     'invenio-userprofiles>=1.0.0',
     'invenio-query-parser>=0.3.0',
     'invenio[{db},{es},base,auth,metadata]~={version}'.format(
         db=DATABASE, es=ELASTICSEARCH, version=INVENIO_VERSION),
-    'invenio-files-rest>=1.0.0b1',
+    'invenio-files-rest==1.0.0',
     'invenio-records-files==1.0.0a11',
 
     # "raven" versions needed till we FIX dependecies on installation
     'raven[flask]>=5.0.0,<5.5',
-    'invenio-logging[sentry]>=1.0.0b1',
-
+    'invenio-logging[sentry]==1.0.0',
     'uWSGI==2.0.17',
     'uwsgi-tools==1.1.1',
     'uwsgitop==0.10',
@@ -156,6 +156,7 @@ setup(
             'cap_cms = cap.modules.experiments.views.cms:cms_bp',
             'cap_reana = cap.modules.reana.views:reana_bp',
             'cap_services = cap.modules.services.views:blueprint',
+            'cap_schemas = cap.modules.schemas.views:blueprint',
             'invenio_oauthclient = invenio_oauthclient.views.client:blueprint',
         ],
         'invenio_celery.tasks': [
@@ -163,6 +164,7 @@ setup(
             'cap_cms = cap.modules.experiments.tasks.cms',
             'cap_lhcb = cap.modules.experiments.tasks.lhcb',
         ],
+        'invenio_search.mappings': [],
         'invenio_pidstore.minters': [
             'cap_record_minter = '
             'cap.modules.records.minters:cap_record_minter',
@@ -177,15 +179,7 @@ setup(
             'cap.modules.deposit.fetchers:cap_deposit_fetcher',
         ],
         'invenio_records.jsonresolver': [
-            'cap = cap.modules.records.resolvers.cap',
-            'local = cap.modules.records.resolvers.local',
-        ],
-        'invenio_search.mappings': [
-            'deposits = cap.mappings',
-            'records = cap.mappings',
-        ],
-        'invenio_jsonschemas.schemas': [
-            'cap_schemas = cap.jsonschemas',
+            'schemas = cap.modules.schemas.resolvers',
         ],
         'invenio_db.models': [
             # 'cap_reana_model = cap.modules.reana.models',

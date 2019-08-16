@@ -21,18 +21,13 @@
 # In applying this license, CERN does not
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
-
 """Deposit API."""
 
 from __future__ import absolute_import, print_function
 
 import copy
-import shutil
-import tempfile
-from copy import deepcopy
 from functools import wraps
 
-import requests
 from celery import shared_task
 from flask import current_app, request
 from flask_login import current_user
@@ -43,19 +38,23 @@ from invenio_deposit.utils import mark_as_action
 from invenio_files_rest.errors import MultipartMissingParts
 from invenio_files_rest.models import Bucket, FileInstance, ObjectVersion
 from invenio_jsonschemas.errors import JSONSchemaNotFound
+from invenio_jsonschemas.proxies import current_jsonschemas
 from invenio_records.models import RecordMetadata
 from invenio_records_files.models import RecordsBuckets
 from invenio_rest.errors import FieldError
-from jsonschema.validators import Draft4Validator, RefResolutionError
+from jsonschema.exceptions import RefResolutionError
+from jsonschema.validators import Draft4Validator
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.local import LocalProxy
 
-from cap.config import FILES_URL_MAX_SIZE
+from cap.modules.deposit.utils import download_from_git, name_git_record
 from cap.modules.experiments.permissions import exp_need_factory
 from cap.modules.records.api import CAPRecord
-from cap.modules.repoimporter.repo_importer import RepoImporter
+from cap.modules.repoimporter.utils import parse_url
 from cap.modules.schemas.models import Schema
+from cap.modules.schemas.resolvers import (resolve_schema_by_url,
+                                           schema_name_to_url)
 from cap.modules.user.errors import DoesNotExistInLDAP
 from cap.modules.user.utils import (get_existing_or_register_role,
                                     get_existing_or_register_user)
@@ -70,10 +69,6 @@ from .permissions import (AdminDepositPermission, CloneDepositPermission,
 
 _datastore = LocalProxy(lambda: current_app.extensions['security'].datastore)
 
-current_jsonschemas = LocalProxy(
-    lambda: current_app.extensions['invenio-jsonschemas']
-)
-
 PRESERVE_FIELDS = (
     '_deposit',
     '_buckets',
@@ -81,14 +76,14 @@ PRESERVE_FIELDS = (
     '_experiment',
     '_access',
     'general_title',
-    '$schema'
+    '$schema',
 )
 
-DEPOSIT_ACTIONS = [
+DEPOSIT_ACTIONS = (
     'deposit-read',
     'deposit-update',
     'deposit-admin',
-]
+)
 
 
 def DEPOSIT_ACTIONS_NEEDS(id):
@@ -101,7 +96,11 @@ def DEPOSIT_ACTIONS_NEEDS(id):
 
 
 EMPTY_ACCESS_OBJECT = {
-    action: {'users': [], 'roles': []} for action in DEPOSIT_ACTIONS
+    action: {
+        'users': [],
+        'roles': []
+    }
+    for action in DEPOSIT_ACTIONS
 }
 
 
@@ -117,13 +116,16 @@ class CAPDeposit(Deposit):
     @property
     def schema(self):
         """Schema property."""
-        return Schema.get_by_fullpath(self['$schema'])
+        return resolve_schema_by_url(self['$schema'])
 
     @property
     def record_schema(self):
-        """Convert deposit schema to a valid record schema."""
-        record_schema = self.schema.get_matching_record_schema()
-        return record_schema.fullpath
+        """Get corresponding schema path for record."""
+        return current_jsonschemas.path_to_url(self.schema.record_path)
+
+    def build_deposit_schema(self, record):
+        """Get schema path for deposit."""
+        return current_jsonschemas.path_to_url(self.schema.deposit_path)
 
     def pop_from_data(method, fields=None):
         """Remove fields from deposit data.
@@ -135,7 +137,7 @@ class CAPDeposit(Deposit):
             '_access',
             '_experiment',
             'general_title',
-            '$schema'
+            '$schema',
         )
 
         @wraps(method)
@@ -146,6 +148,7 @@ class CAPDeposit(Deposit):
                     args[0].pop(field)
 
             return method(self, *args, **kwargs)
+
         return wrapper
 
     def pop_from_data_patch(method, fields=None):
@@ -170,6 +173,7 @@ class CAPDeposit(Deposit):
                         del args[0][k]
 
             return method(self, *args, **kwargs)
+
         return wrapper
 
     @mark_as_action
@@ -205,36 +209,34 @@ class CAPDeposit(Deposit):
         """Upload action for file/repository."""
         with UpdateDepositPermission(self).require(403):
             data = request.get_json()
+            try:
+                url_attrs = parse_url(data['url'])
+            except ValueError:
+                raise FileUploadError(
+                    'URL could not be parsed. '
+                    'Try again with correct GitHub / CERN GitLab link.')
 
-            fileinfo = self._construct_fileinfo(data['url'],
-                                                data['type'])
             if request:
                 _, record = request.view_args.get('pid_value').data
                 record_id = str(record.id)
-                filename = fileinfo['filename']
-                obj = ObjectVersion.create(
-                    bucket=record.files.bucket, key=filename
-                )
+                approved_hosts = ('https://github', 'https://gitlab.cern.ch',
+                                  'root://')
+
+                # use the name and branch to create a key for the record
+                name = name_git_record(url_attrs, data['type'])
+                obj = ObjectVersion.create(bucket=record.files.bucket,
+                                           key=name)
                 obj.file = FileInstance.create()
                 record.files.flush()
-                record.files[filename]['source_url'] = data['url']
+                record.files[name]['source_url'] = data['url']
 
-                if data['type'] == 'url':
-                    if data['url'].startswith(
-                            ('https://github',
-                             'https://gitlab.cern.ch',
-                             'root://')):
-                        download_url.delay(record_id, data['url'], fileinfo)
-                    else:
-                        raise FileUploadError(
-                            'Please provide a valid file url.')
+                if data['url'].startswith(approved_hosts):
+                    record = CAPDeposit.get_record(record_id)
+                    download_from_git.delay(record, name, url_attrs, data)
                 else:
-                    if data['url'].startswith(
-                            ('https://github', 'https://gitlab.cern.ch')):
-                        download_repo.delay(record_id, data['url'], filename)
-                    else:
-                        raise FileUploadError(
-                            'Please provide a valid repository url.')
+                    raise FileUploadError(
+                        'URL could not be parsed. '
+                        'Try again with correct GitHub / CERN GitLab link.')
 
             return self
 
@@ -301,8 +303,7 @@ class CAPDeposit(Deposit):
 
                     if obj['op'] == 'add':
                         try:
-                            self._add_user_permissions(user,
-                                                       [obj['action']],
+                            self._add_user_permissions(user, [obj['action']],
                                                        db.session)
                         except IntegrityError:
                             raise UpdateDepositPermissionsError(
@@ -310,9 +311,8 @@ class CAPDeposit(Deposit):
 
                     elif obj['op'] == 'remove':
                         try:
-                            self._remove_user_permissions(user,
-                                                          [obj['action']],
-                                                          db.session)
+                            self._remove_user_permissions(
+                                user, [obj['action']], db.session)
                         except NoResultFound:
                             raise UpdateDepositPermissionsError(
                                 'Permission does not exist.')
@@ -326,17 +326,15 @@ class CAPDeposit(Deposit):
 
                     if obj['op'] == 'add':
                         try:
-                            self._add_egroup_permissions(role,
-                                                         [obj['action']],
-                                                         db.session)
+                            self._add_egroup_permissions(
+                                role, [obj['action']], db.session)
                         except IntegrityError:
                             raise UpdateDepositPermissionsError(
                                 'Permission already exist.')
                     elif obj['op'] == 'remove':
                         try:
-                            self._remove_egroup_permissions(role,
-                                                            [obj['action']],
-                                                            db.session)
+                            self._remove_egroup_permissions(
+                                role, [obj['action']], db.session)
                         except NoResultFound:
                             raise UpdateDepositPermissionsError(
                                 'Permission does not exist.')
@@ -363,67 +361,44 @@ class CAPDeposit(Deposit):
         self.files.flush()
         return super(CAPDeposit, self).commit(*args, **kwargs)
 
-    def _add_user_permissions(self,
-                              user,
-                              permissions,
-                              session):
+    def _add_user_permissions(self, user, permissions, session):
         """Adds permissions for user for this deposit."""
         for permission in permissions:
             session.add(
-                ActionUsers.allow(
-                    DEPOSIT_ACTIONS_NEEDS(self.id)[permission],
-                    user=user
-                )
-            )
+                ActionUsers.allow(DEPOSIT_ACTIONS_NEEDS(self.id)[permission],
+                                  user=user))
 
             session.flush()
 
             self['_access'][permission]['users'].append(user.id)
 
-    def _remove_user_permissions(self,
-                                 user,
-                                 permissions,
-                                 session):
+    def _remove_user_permissions(self, user, permissions, session):
         """Remove permissions for user for this deposit."""
         for permission in permissions:
             session.delete(
-                ActionUsers.query.filter(
-                    ActionUsers.action == permission,
-                    ActionUsers.argument == str(self.id),
-                    ActionUsers.user_id == user.id
-                ).one()
-            )
+                ActionUsers.query.filter(ActionUsers.action == permission,
+                                         ActionUsers.argument == str(self.id),
+                                         ActionUsers.user_id == user.id).one())
             session.flush()
 
             self['_access'][permission]['users'].remove(user.id)
 
-    def _add_egroup_permissions(self,
-                                egroup,
-                                permissions,
-                                session):
+    def _add_egroup_permissions(self, egroup, permissions, session):
         for permission in permissions:
             session.add(
-                ActionRoles.allow(
-                    DEPOSIT_ACTIONS_NEEDS(self.id)[permission],
-                    role=egroup
-                )
-            )
+                ActionRoles.allow(DEPOSIT_ACTIONS_NEEDS(self.id)[permission],
+                                  role=egroup))
             session.flush()
 
             self['_access'][permission]['roles'].append(egroup.id)
 
-    def _remove_egroup_permissions(self,
-                                   egroup,
-                                   permissions,
-                                   session):
+    def _remove_egroup_permissions(self, egroup, permissions, session):
         for permission in permissions:
             session.delete(
                 ActionRoles.query.filter(
                     ActionRoles.action == permission,
                     ActionRoles.argument == str(self.id),
-                    ActionRoles.role_id == egroup.id
-                ).one()
-            )
+                    ActionRoles.role_id == egroup.id).one())
             session.flush()
 
             self['_access'][permission]['roles'].remove(egroup.id)
@@ -440,33 +415,17 @@ class CAPDeposit(Deposit):
                 self._add_egroup_permissions(ar.role, permissions, db.session)
 
     def _init_owner_permissions(self, owner=current_user):
-        self['_access'] = deepcopy(EMPTY_ACCESS_OBJECT)
+        self['_access'] = copy.deepcopy(EMPTY_ACCESS_OBJECT)
 
         if owner:
             with db.session.begin_nested():
-                self._add_user_permissions(owner,
-                                           DEPOSIT_ACTIONS,
-                                           db.session)
+                self._add_user_permissions(owner, DEPOSIT_ACTIONS, db.session)
 
             self['_deposit']['created_by'] = owner.id
             self['_deposit']['owners'] = [owner.id]
 
-    def _construct_fileinfo(self, url, type):
-        """Construct repo name  or file name."""
-        url = url.rstrip('/')
-        branch = None
-        if type == 'repo':
-            filename = filepath = url.split('/')[-1] + '.tar.gz'
-        else:
-            url = url.split('/blob/')[-1]
-            info = url.split('/')
-            branch = info[0]
-            filename = info[-1]
-            filepath = '/'.join(info[1:])
-        return {'filepath': filepath, 'filename': filename, 'branch': branch}
-
     def _set_experiment(self):
-        schema = Schema.get_by_fullpath(self['$schema'])
+        schema = resolve_schema_by_url(self['$schema'])
         self['_experiment'] = schema.experiment
 
     def _create_buckets(self):
@@ -475,32 +434,35 @@ class CAPDeposit(Deposit):
 
     def validate(self, **kwargs):
         """Validate data using schema with ``JSONResolver``."""
-        result = {}
-        try:
-            schema = self['$schema']
-            if not isinstance(schema, dict):
-                schema = {'$ref': schema}
-            resolver = current_app.extensions[
-                'invenio-records'].ref_resolver_cls.from_schema(schema)
+        if '$schema' in self and self['$schema']:
+            try:
+                schema = self['$schema']
+                if not isinstance(schema, dict):
+                    schema = {'$ref': schema}
+                resolver = current_app.extensions[
+                    'invenio-records'].ref_resolver_cls.from_schema(schema)
 
-            result['errors'] = [
-                FieldError(list(error.path), str(error.message))
-                for error in
-                Draft4Validator(schema, resolver=resolver).iter_errors(self)
-            ]
+                validator = Draft4Validator(schema, resolver=resolver)
 
-            if result['errors']:
-                raise DepositValidationError(None, errors=result['errors'])
-        except RefResolutionError:
-            raise DepositValidationError('Schema with given url not found.')
-        except KeyError:
-            raise DepositValidationError('Schema field is required.')
+                result = {}
+                result['errors'] = [
+                    FieldError(list(error.path), str(error.message))
+                    for error in validator.iter_errors(self)
+                ]
+
+                if result['errors']:
+                    raise DepositValidationError(None, errors=result['errors'])
+            except RefResolutionError:
+                raise DepositValidationError(
+                    'Schema with given url not found.')
+        else:
+            raise DepositValidationError('You need to provide a valid schema.')
 
     @classmethod
     def get_record(cls, id_, with_deleted=False):
         """Get record instance."""
-        deposit = super(CAPDeposit, cls).get_record(
-            id_=id_, with_deleted=with_deleted)
+        deposit = super(CAPDeposit, cls).get_record(id_=id_,
+                                                    with_deleted=with_deleted)
         deposit['_files'] = deposit.files.dumps()
         return deposit
 
@@ -525,110 +487,28 @@ class CAPDeposit(Deposit):
 
     @classmethod
     def _preprocess_data(cls, data):
-
         # data can be sent without specifying particular version of schema,
         # but just with a type, e.g. cms-analysis
         # this be resolved to the last version of deposit schema of this type
         if '$ana_type' in data:
             try:
-                schema = Schema.get_latest(
-                    'deposits/records/{}'.format(data['$ana_type'])
-                )
+                ana_type = data.pop('$ana_type')
+                data['$schema'] = schema_name_to_url(ana_type)
             except JSONSchemaNotFound:
                 raise DepositValidationError(
-                    'Schema {} is not a valid deposit schema.'
-                    .format(data['$ana_type']))
-
-            data['$schema'] = schema.fullpath
-            data.pop('$ana_type')
+                    'Schema {} is not a valid deposit schema.'.format(
+                        ana_type))
 
         return data
 
     @classmethod
     def _validate_data(cls, data):
         if not isinstance(data, dict) or data == {}:
+
             raise DepositValidationError('Empty deposit data.')
 
         try:
-            schema_fullpath = data['$schema']
+            schema_url = data['$schema']
+
         except KeyError:
             raise DepositValidationError('Schema not specified.')
-
-        try:
-            Schema.get_by_fullpath(schema_fullpath)
-        except (AttributeError, JSONSchemaNotFound):
-            raise DepositValidationError('Schema {} is not a valid option.'
-                                         .format(schema_fullpath))
-
-
-@shared_task(max_retries=5)
-def download_url(pid, url, fileinfo):
-    """Task for fetching external files/repos."""
-    record = CAPDeposit.get_record(pid)
-    size = None
-    if url.startswith("root://"):
-        from xrootdpyfs.xrdfile import XRootDPyFile
-        response = XRootDPyFile(url, mode='r-')
-        total = response.size
-    else:
-        try:
-            filepath = fileinfo.get('filepath', None)
-            filename = fileinfo.get('filename', None)
-            branch = fileinfo.get('branch', None)
-            file = RepoImporter.create(url, branch).archive_file(filepath)
-            url = file.get('url', None)
-            size = file.get('size', None)
-            token = file.get('token', None)
-            headers = {'PRIVATE-TOKEN': token}
-            response = requests.get(
-                url, stream=True, headers=headers).raw
-            response.decode_content = True
-            total = size or int(
-                response.headers.get('Content-Length'))
-        except TypeError as exc:
-            download_url.retry(exc=exc, countdown=10)
-    task_commit(record, response, filename, total)
-
-
-@shared_task(max_retries=5)
-def download_repo(pid, url, filename):
-    """Task for fetching external files/repos."""
-    record = CAPDeposit.get_record(pid)
-    try:
-        link = RepoImporter.create(url).archive_repository()
-        response = ensure_content_length(link)
-        total = int(response.headers.get('Content-Length'))
-    except TypeError as exc:
-        download_repo.retry(exc=exc, countdown=10)
-    task_commit(record, response.raw, filename, total)
-
-
-def task_commit(record, response, filename, total):
-    """Commit file to the record."""
-    record.files[filename].file.set_contents(
-        response,
-        default_location=record.files.bucket.location.uri,
-        size=total
-    )
-    db.session.commit()
-
-
-def ensure_content_length(
-        url, method='GET',
-        session=None,
-        max_size=FILES_URL_MAX_SIZE or 2**20,
-        *args, **kwargs):
-    """Add Content-Length when no present."""
-    kwargs['stream'] = True
-    session = session or requests.Session()
-    r = session.request(method, url, *args, **kwargs)
-    if 'Content-Length' not in r.headers:
-        # stream content into a temporary file so we can get the real size
-        spool = tempfile.SpooledTemporaryFile(max_size)
-        shutil.copyfileobj(r.raw, spool)
-        r.headers['Content-Length'] = str(spool.tell())
-        spool.seek(0)
-        # replace the original socket with our temporary file
-        r.raw._fp.close()
-        r.raw._fp = spool
-    return r
