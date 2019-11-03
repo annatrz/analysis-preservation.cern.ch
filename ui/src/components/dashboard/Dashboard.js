@@ -20,13 +20,6 @@ class Dashboard extends React.Component {
   render() {
     return (
       <Box full={true} colorIndex="light-2">
-        {/* <Header
-          size="small"
-          colorIndex="neutral-1-a"
-          pad="none"
-          wrap={true}
-          justify="center"
-        /> */}
         {!this.props.permissions && (
           <Notification
             message="Your account has no permissions for the platform."
@@ -34,20 +27,33 @@ class Dashboard extends React.Component {
           />
         )}
         {this.props.results ? (
+        <Box>
           <Box direction="row" wrap>
-            <Box pad="medium" size={{ width: { min: "medium" } }} flex={true}>
+            <Box pad="medium" size={{ width: { min: "medium" } }} flex>
               <DashboardList
-                listType="published"
-                collab_items={this.props.results.published_by_collab.data}
-                collab_items_title="collaboration"
-                mine={this.props.results.user_published.data}
-                header="published in collaboration"
+                  datasets={{
+                      all: this.props.results.published,
+                      mine: this.props.results.user_published,
+                  }}
+                header="recently published"
                 urlDetailed="/published"
-                urlMore={this.props.results.published_by_collab.more}
                 emptyMessage="All analyses published on CAP by members of your collaboration."
               />
             </Box>
-            <Box pad="small" flex={false} align="center">
+            <Box pad="medium" size={{ width: { min: "medium" } }} flex>
+              <DashboardList
+                datasets={{
+                    all: this.props.results.drafts,
+                    mine: this.props.results.user_drafts,
+                }}
+                header="drafts"
+                urlDetailed="/drafts"
+                emptyMessage="Draft analyses that you have read/write access to."
+              />
+            </Box>
+          </Box>
+           <Box direction="row" wrap>
+            <Box pad="small" flex align="center">
               <AnnotatedMeter
                 legend={true}
                 type="circle"
@@ -67,20 +73,9 @@ class Dashboard extends React.Component {
                 ]}
               />
             </Box>
-            <Box pad="medium" size={{ width: { min: "medium" } }} flex={true}>
-              <DashboardList
-                listType="draft"
-                collab_items={this.props.results.shared_with_user.data}
-                collab_items_title="shared"
-                show_all
-                mine={this.props.results.user_drafts.data}
-                header="drafts"
-                urlDetailed="/drafts"
-                urlMore={this.props.results.shared_with_user.more}
-                emptyMessage="Draft analyses that your collaborators have given you read/write access to."
-              />
-            </Box>
           </Box>
+      </Box>
+ 
         ) : null}
       </Box>
     );
