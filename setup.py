@@ -76,7 +76,7 @@ install_requires = [
     # temporary pinned since there are 'connection closed' issues
     # on production server
     'urllib3[secure]==1.22',
-    'SQLAlchemy-Continuum==1.3.4',
+    'sqlalchemy==1.3',
 
     # temporary pinned since there are 'fs' conslicts between
     # 'reana-commons' and 'invenio-files-rest'
@@ -95,14 +95,12 @@ install_requires = [
     # "raven" versions needed till we FIX dependecies on installation
     'raven[flask]>=5.0.0,<5.5',
     'invenio-logging[sentry]>=1.0.0b1',
-
     'uWSGI==2.0.17',
     'uwsgi-tools==1.1.1',
     'uwsgitop==0.10',
 ]
 
 packages = find_packages()
-
 
 # Get the version string. Cannot be done with import!
 g = {}
