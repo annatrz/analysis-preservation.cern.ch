@@ -482,6 +482,7 @@ class CAPDeposit(Deposit):
 
     def validate(self, **kwargs):
         """Validate data using schema with ``JSONResolver``."""
+        from cap.modules.deposit.loaders import MyValidator
         if '$schema' in self and self['$schema']:
             try:
                 schema = self['$schema']
@@ -490,7 +491,7 @@ class CAPDeposit(Deposit):
                 resolver = current_app.extensions[
                     'invenio-records'].ref_resolver_cls.from_schema(schema)
 
-                validator = Draft4Validator(schema, resolver=resolver)
+                validator = MyValidator(schema, resolver=resolver)
 
                 result = {}
                 result['errors'] = [
@@ -592,11 +593,9 @@ class CAPDeposit(Deposit):
     @classmethod
     def _validate_data(cls, data):
         if not isinstance(data, dict) or data == {}:
-
             raise DepositValidationError('Empty deposit data.')
 
         try:
             data['$schema']
-
         except KeyError:
             raise DepositValidationError('Schema not specified.')
