@@ -114,7 +114,7 @@ def recreate_es_index_from_source(alias, source, mapping=None, settings=None):
     if es.indices.exists(new_index):
         es.indices.delete(index=new_index)
     es.indices.create(index=new_index,
-                      body=dict(mappings=mapping, settings=settings))
+                      body=dict(mappings=mapping, settings=settings or {}))
 
     # index datasets from file under new index
     try:

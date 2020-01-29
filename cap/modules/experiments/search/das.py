@@ -21,18 +21,41 @@
 # In applying this license, CERN does not
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
-"""Cern Analysis Preservation CMS utils."""
+"""Search classes and methods for DAS querying."""
 
-from ..search.cms_triggers import CMS_TRIGGERS_ES_CONFIG
-from .common import recreate_es_index_from_source
+from elasticsearch_dsl import Search
+from invenio_search.proxies import current_search_client as es
+
+DAS_DATASETS_ES_CONFIG = {
+    'alias': 'das-datasets',
+    "mappings": {
+        "doc": {
+            "properties": {
+                "name": {
+                    "type": "completion",
+                    "analyzer": "standard"
+                }
+            }
+        }
+    }
+}
 
 
-def cache_cms_triggers_in_es_from_file(source):
-    """Cache triggers names in ES, so can be used for autocompletion.
+class DASSearch(Search):
+    """ES Search class for DAS datasets."""
+    class Meta:
+        index = DAS_DATASETS_ES_CONFIG['alias']
+        fields = ('name', )
 
-    :param source: list of dict with dataset, year and trigger
-    """
-    recreate_es_index_from_source(alias=CMS_TRIGGERS_ES_CONFIG['alias'],
-                                  mapping=CMS_TRIGGERS_ES_CONFIG['mappings'],
-                                  settings=CMS_TRIGGERS_ES_CONFIG['settings'],
-                                  source=source)
+    def __init__(self, **kwargs):
+        """Use Meta to set kwargs defaults."""
+        kwargs.setdefault('index', getattr(self.Meta, 'index', None))
+        kwargs.setdefault('using', es)
+
+        super(DASSearch, self).__init__(**kwargs)
+
+    def prefix_search(self, prefix):
+        return self.query('prefix', name=prefix)
+
+    def exact_search(self, term):
+        return self.query('match', name=term)

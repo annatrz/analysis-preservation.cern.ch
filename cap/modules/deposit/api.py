@@ -43,12 +43,13 @@ from invenio_records.models import RecordMetadata
 from invenio_records_files.models import RecordsBuckets
 from invenio_rest.errors import FieldError
 from jsonschema.exceptions import RefResolutionError
-from jsonschema.validators import Draft4Validator
+from jsonschema.validators import Draft4Validator, extend
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.local import LocalProxy
 
 from cap.modules.deposit.errors import FileUploadError
+from cap.modules.deposit.validators import DepositValidator
 from cap.modules.experiments.permissions import exp_need_factory
 from cap.modules.records.api import CAPRecord
 from cap.modules.repoimporter.errors import GitError
@@ -482,7 +483,6 @@ class CAPDeposit(Deposit):
 
     def validate(self, **kwargs):
         """Validate data using schema with ``JSONResolver``."""
-        from cap.modules.deposit.loaders import MyValidator
         if '$schema' in self and self['$schema']:
             try:
                 schema = self['$schema']
@@ -491,7 +491,7 @@ class CAPDeposit(Deposit):
                 resolver = current_app.extensions[
                     'invenio-records'].ref_resolver_cls.from_schema(schema)
 
-                validator = MyValidator(schema, resolver=resolver)
+                validator = DepositValidator(schema, resolver=resolver)
 
                 result = {}
                 result['errors'] = [

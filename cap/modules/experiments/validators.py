@@ -21,40 +21,30 @@
 # In applying this license, CERN does not
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
-"""CAP Deposit loaders."""
+"""Experiment validators methods."""
 
-from copy import deepcopy
-
-from flask import current_app, request
-from invenio_rest.errors import FieldError
-from jsonschema import Draft4Validator, FormatChecker, validators
 from jsonschema.exceptions import ValidationError
 
-from cap.modules.deposit.utils import clean_empty_values
-from cap.modules.schemas.resolvers import (resolve_schema_by_url,
-                                           schema_name_to_url)
-
-all_validators = dict(Draft4Validator.VALIDATORS)
+from .search.cms_triggers import CMSTriggerSearch
+from .search.das import DASSearch
 
 
-def validate_das_dataset(validator, value, instance, schema):
-    import ipdb
-    ipdb.set_trace()
-    pass
+def validate_cms_trigger(validator, value, instance, schema):
+    errors = []
+    for trigger in instance.get('triggers', []):
+        search = CMSTriggerSearch().exact_search(trigger['trigger'],
+                                                 instance.get('path'),
+                                                 instance.get('year'))
+        if search.count() == 0:
+            errors.append("{} is not a valid trigger name.".format(
+                trigger['trigger']))
+
+    if errors:
+        yield ValidationError(errors)
 
 
-all_validators['validate-with-das'] = validate_das_dataset
+def validate_das_path(validator, value, instance, schema):
+    search = DASSearch().exact_search(instance)
 
-MyValidator = validators.extend(Draft4Validator, validators=all_validators)
-
-
-def json_v1_loader(data=None):
-    """Load data from request and process URLs."""
-    data = deepcopy(data or request.get_json())
-
-    # remove underscore prefixed fields
-    data = {k: v for k, v in data.items() if not k.startswith('_')}
-
-    result = clean_empty_values(data)
-
-    return result
+    if search.count() == 0:
+        yield ValidationError("{} not found in DAS.".format(instance))

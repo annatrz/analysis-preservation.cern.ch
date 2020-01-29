@@ -34,9 +34,9 @@ from six.moves.urllib.parse import unquote
 
 from ..permissions import cms_permission
 from ..search.cms_triggers import CMSTriggerSearch
+from ..search.das import DAS_DATASETS_ES_CONFIG
 from ..serializers import CADISchema
 from ..utils.cadi import get_from_cadi_by_id
-from ..utils.das import DAS_DATASETS_INDEX
 
 cms_bp = Blueprint(
     'cap_cms',
@@ -70,7 +70,7 @@ def get_analysis_from_cadi(cadi_id):
 @cms_permission.require(403)
 def get_datasets_suggestions():
     """Retrieve specific dataset names."""
-    alias = DAS_DATASETS_INDEX['alias']
+    alias = DAS_DATASETS_ES_CONFIG['alias']
     term = unquote(request.args.get('query'))
     res = []
 

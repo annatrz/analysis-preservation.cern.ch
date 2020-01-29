@@ -56,10 +56,11 @@ from cap.modules.auth.models import OAuth2Token
 from cap.modules.deposit.api import CAPDeposit as Deposit
 from cap.modules.experiments.permissions import exp_need_factory
 from cap.modules.experiments.search.cms_triggers import CMS_TRIGGERS_ES_CONFIG
+from cap.modules.experiments.search.das import DAS_DATASETS_ES_CONFIG
 from cap.modules.experiments.utils.cms import \
     cache_cms_triggers_in_es_from_file
-from cap.modules.experiments.utils.das import (
-    DAS_DATASETS_INDEX, cache_das_datasets_in_es_from_file)
+from cap.modules.experiments.utils.das import \
+    cache_das_datasets_in_es_from_file
 from cap.modules.repoimporter.models import GitRepository
 from cap.modules.schemas.models import Schema
 from cap.modules.schemas.resolvers import resolve_schema_by_url
@@ -428,7 +429,7 @@ def das_datasets_index(es):
 
     cache_das_datasets_in_es_from_file(source)
 
-    current_search.flush_and_refresh(DAS_DATASETS_INDEX['alias'])
+    current_search.flush_and_refresh(DAS_DATASETS_ES_CONFIG['alias'])
 
 
 @pytest.fixture
