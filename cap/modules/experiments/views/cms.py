@@ -33,9 +33,9 @@ from invenio_search.proxies import current_search_client as es
 from six.moves.urllib.parse import unquote
 
 from ..permissions import cms_permission
+from ..search.cms_triggers import CMSTriggerSearch
 from ..serializers import CADISchema
 from ..utils.cadi import get_from_cadi_by_id
-from ..utils.cms import CMS_TRIGGERS_INDEX
 from ..utils.das import DAS_DATASETS_INDEX
 
 cms_bp = Blueprint(
@@ -99,7 +99,8 @@ def get_datasets_suggestions():
 def get_triggers_suggestions():
     """Retrieve specific dataset names."""
     try:
-        term = unquote(request.args.get('query'))
+        year = unquote(request.args.get('year'))
+        query = unquote(request.args.get('query'))
         dataset = unquote(request.args.get('dataset'))
         dataset_prefix = re.search('/?([^/]+)*', dataset).group(1) or ''
     except TypeError:
@@ -107,31 +108,7 @@ def get_triggers_suggestions():
             400, 'You need to provide query and dataset(eg. /ZeroBias7/..) \
             as parameters.')
 
-    year = request.args.get('year')
-    index = CMS_TRIGGERS_INDEX['alias']
+    search = CMSTriggerSearch().prefix_search(query, dataset_prefix, year)
+    results = search.execute()
 
-    # triggers are categorized by dataset prefix
-    query = {
-        "query": {
-            "bool": {
-                "must": [{
-                    "prefix": {
-                        "trigger": term
-                    }
-                }, {
-                    "term": {
-                        "dataset": dataset_prefix
-                    }
-                }]
-            }
-        }
-    }
-
-    # optional filtering by year
-    if year:
-        query['query']['bool']['must'].append({"term": {"year": year}})
-
-    res = es.search(index=index, body=query)
-    res = [sugg['_source']['trigger'] for sugg in res['hits']['hits']]
-
-    return jsonify(res)
+    return jsonify([hit.trigger for hit in results])
