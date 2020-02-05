@@ -34,6 +34,13 @@ from flask import current_app
 from invenio_search.proxies import current_search_client as es
 
 
+def create_batches(items, chunk_size=1):
+    """Create batches of a specified size, in a list."""
+    item_len = len(items)
+    for i in range(0, item_len, chunk_size):
+        yield items[i:min(i + chunk_size, item_len)]
+
+
 def kinit(principal, keytab):
     """Run a function with given kerberos credentials.
 
@@ -103,6 +110,7 @@ def recreate_es_index_from_source(alias, source, mapping=None, settings=None):
     :param List(dict) source:  List of documents to index
     :param dict mapping: ES Mapping object
     :param dict settings: ES Settings object
+    :param dict id_key: Index key, defaulta to no index if not provided
     """
     if es.indices.exists('{}-v1'.format(alias)):
         old_index, new_index = ('{}-v1'.format(alias), '{}-v2'.format(alias))
@@ -116,20 +124,26 @@ def recreate_es_index_from_source(alias, source, mapping=None, settings=None):
                       body=dict(mappings=mapping, settings=settings or {}))
 
     # index datasets from file under new index
-    try:
-        print("Indexing...")
-        actions = [{
-            "_index": new_index,
-            "_type": 'doc',
-            "_id": idx,
-            "_source": obj
-        } for idx, obj in enumerate(source)]
+    batches = create_batches(source, chunk_size=100000)
 
-        helpers.bulk(es, actions)
-    except Exception as e:
-        # delete index if sth went wrong
-        es.indices.delete(index=new_index)
-        raise e
+    for batch in batches:
+        try:
+            print("Indexing...")
+            if id_key:
+                actions = [{
+                    '_id': obj[id_key],
+                    '_source': obj
+                } for obj in batch]
+            else:
+                actions = [{
+                    '_source': obj
+                } for obj in batch]
+
+            helpers.bulk(es, actions, index=new_index, doc_type='doc')
+        except Exception as e:
+            # delete index if sth went wrong
+            es.indices.delete(index=old_index)
+            raise e
 
     # add newly created index under das-datasets alias
     es.indices.put_alias(index=new_index, name=alias)

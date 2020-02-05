@@ -40,7 +40,8 @@ def update_term_for_das_query(term):
 
 def cache_das_datasets_in_es_from_file(source):
     """Cache datasets names from DAS in ES."""
-    recreate_es_index_from_source(alias=DAS_DATASETS_ES_CONFIG['alias'],
-                                  mapping=DAS_DATASETS_ES_CONFIG['mappings'],
-                                  settings=DAS_DATASETS_ES_CONFIG['settings'],
+    recreate_es_index_from_source(alias=DAS_DATASETS_INDEX['alias'],
+                                  mapping=DAS_DATASETS_INDEX['mappings'],
+                                  settings=DAS_DATASETS_INDEX['settings'],
+                                  id_key='name',
                                   source=source)
