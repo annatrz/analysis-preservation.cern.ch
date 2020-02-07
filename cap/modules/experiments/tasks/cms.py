@@ -109,9 +109,10 @@ def reindex_das_entries():
     """Reindex DAS entries in Elastic with the latest version."""
     file_location = os.path.join(
         current_app.config['EXPERIMENTS_RESOURCES_LOCATION'], 'das.txt')
+    file_location = os.path.join('das.txt')
 
     with open(file_location, 'r') as fp:
-        source = tuple(dict(name=line.strip()) for line in fp)
+        source = (dict(name=line.strip()) for line in fp)
         cache_das_datasets_in_es_from_file(source)
 
     current_app.logger.info('DAS entries indexed succesfully.')

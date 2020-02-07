@@ -24,6 +24,7 @@
 """Experiments common utils."""
 
 from functools import wraps
+from itertools import count, groupby
 from os.path import join
 from subprocess import CalledProcessError, check_output
 
@@ -34,11 +35,10 @@ from flask import current_app
 from invenio_search.proxies import current_search_client as es
 
 
-def create_batches(items, chunk_size=1):
-    """Create batches of a specified size, in a list."""
-    item_len = len(items)
-    for i in range(0, item_len, chunk_size):
-        yield items[i:min(i + chunk_size, item_len)]
+def create_batches(iterable, chunk_size=10):
+    c = count()
+    for _, g in groupby(iterable, lambda _: next(c) // chunk_size):
+        yield g
 
 
 def kinit(principal, keytab):
@@ -97,7 +97,11 @@ def generate_krb_cookie(principal, kt, url):
     return generate(url)
 
 
-def recreate_es_index_from_source(alias, source, mapping=None, settings=None):
+def recreate_es_index_from_source(alias,
+                                  source,
+                                  mapping=None,
+                                  settings=None,
+                                  id_getter=None):
     """
     Recreate index in ES, with documents passed in source.
 
@@ -126,24 +130,22 @@ def recreate_es_index_from_source(alias, source, mapping=None, settings=None):
     # index datasets from file under new index
     batches = create_batches(source, chunk_size=100000)
 
+    print("Indexing...", end='')
+
     for batch in batches:
         try:
-            print("Indexing...")
-            if id_key:
-                actions = [{
-                    '_id': obj[id_key],
-                    '_source': obj
-                } for obj in batch]
-            else:
-                actions = [{
-                    '_source': obj
-                } for obj in batch]
-
+            actions = [{
+                '_id': id_getter(obj) if id_getter else None,
+                '_source': obj
+            } for obj in batch]
             helpers.bulk(es, actions, index=new_index, doc_type='doc')
+            print('.', end='')
         except Exception as e:
-            # delete index if sth went wrong
-            es.indices.delete(index=old_index)
+            es.indices.delete(
+                index=old_index)  # delete index if sth went wrong
             raise e
+
+    print('')
 
     # add newly created index under das-datasets alias
     es.indices.put_alias(index=new_index, name=alias)

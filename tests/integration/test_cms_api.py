@@ -150,7 +150,6 @@ def test_get_datasets_suggestions_when_no_query_passed_returns_empty_list(
 
 
 def test_get_datasets_suggestions_returns_correct_suggestions(
-<<<<<<< HEAD
     client, users, auth_headers_for_user, das_datasets_index):
     resp = client.get('/cms/datasets?query=/datas*',
                       headers=auth_headers_for_user(users['cms_user']))
