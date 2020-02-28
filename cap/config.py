@@ -102,7 +102,7 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': timedelta(days=1),
     },
     'ping_webhooks': {
-        'task': 'cap.modules.repoimporter.tasks.ping_webhooks',
+        'task': 'cap.modules.git.tasks.ping_webhooks',
         'schedule': timedelta(hours=12),
     },
     'das_harvester': {
@@ -626,4 +626,4 @@ if DEBUG_MODE == 'True' and TEST_WITH_NGROK == 'True':
               'Use CAP_TEST_WITH_NGROK=False if dont want to use it.\n'
               f'Exception: {str(e)}.')
 
-WEBHOOK_ENDPOINT = 'cap_repos.get_webhook_event'
+WEBHOOK_ENDPOINT = 'cap_git.get_webhook_event'

@@ -28,9 +28,9 @@ from __future__ import absolute_import, print_function
 import pytest
 from pytest import mark
 
-from cap.modules.repoimporter.errors import GitURLParsingError
-from cap.modules.repoimporter.factory import create_git_api
-from cap.modules.repoimporter.utils import parse_git_url
+from cap.modules.git.errors import GitURLParsingError
+from cap.modules.git.factory import create_git_api
+from cap.modules.git.utils import parse_git_url
 
 
 def test_parse_git_url_with_wrong_url():
