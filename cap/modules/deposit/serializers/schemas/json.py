@@ -28,13 +28,12 @@ from __future__ import absolute_import, print_function
 import copy
 
 from invenio_jsonschemas import current_jsonschemas
-from marshmallow import fields, Schema
+from marshmallow import fields
 
 from cap.modules.deposit.api import CAPDeposit
 from cap.modules.deposit.permissions import UpdateDepositPermission
+from cap.modules.git.serializers import GitWebhookSubscriberSchema
 from cap.modules.records.serializers.schemas import common
-
-from cap.modules.repoimporter.serializers import GitSnapshotSchema
 
 from cap.modules.workflows.serializers import ReanaWorkflowSchema
 
@@ -49,14 +48,6 @@ class DepositSchema(common.CommonRecordSchema):
     cloned_from = fields.Dict(attribute='metadata._deposit.cloned_from.value',
                               dump_only=True)
 
-    # def can_user_update(self, obj):
-    #     deposit = CAPDeposit.get_record(obj['pid'].object_uuid)
-    #     return UpdateDepositPermission(deposit).can()
-
-    # def can_user_admin(self, obj):
-    #     deposit = CAPDeposit.get_record(obj['pid'].object_uuid)
-    #     return AdminDepositPermission(deposit).can()
-
 
 class DepositFormSchema(DepositSchema):
     """Schema for deposit v1 in JSON."""
@@ -64,14 +55,14 @@ class DepositFormSchema(DepositSchema):
     schemas = fields.Method('get_deposit_schemas', dump_only=True)
     can_update = fields.Method('can_user_update', dump_only=True)
 
-    repositories = fields.Method('get_repositories', dump_only=True)
+    repositories = fields.Method('get_webhooks', dump_only=True)
     workflows = fields.Method('get_workflows', dump_only=True)
 
-    def get_repositories(self, obj):
+    def get_webhooks(self, obj):
         deposit = CAPDeposit.get_record(obj['pid'].object_uuid)
         webhooks = deposit.model.webhooks
 
-        return DepositRepositoriesSchema(many=True).dump(webhooks).data
+        return GitWebhookSubscriberSchema(many=True).dump(webhooks).data
 
     def get_workflows(self, obj):
         deposit = CAPDeposit.get_record(obj['pid'].object_uuid)
@@ -92,20 +83,3 @@ class DepositFormSchema(DepositSchema):
     def can_user_update(self, obj):
         deposit = CAPDeposit.get_record(obj['pid'].object_uuid)
         return UpdateDepositPermission(deposit).can()
-
-
-class DepositRepositoriesSchema(Schema):
-    host = fields.Str(attribute='repo.host', dump_only=True)
-    owner = fields.Str(attribute='repo.owner', dump_only=True)
-    name = fields.Str(attribute='repo.name', dump_only=True)
-    branch = fields.Str(attribute='repo.branch', dump_only=True)
-
-    type = fields.Str(dump_only=True)
-    status = fields.Str(dump_only=True)
-    user = fields.Str(dump_only=True)
-
-    snapshots = fields.Method('get_snapshots', dump_only=True)
-    user = fields.Str(attribute='user.email', dump_only=True)
-
-    def get_snapshots(self, obj):
-        return GitSnapshotSchema(many=True).dump(obj.webhook.snapshots).data
