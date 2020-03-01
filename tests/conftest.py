@@ -327,7 +327,8 @@ def create_deposit(app, db, es, location, create_schema):
                         metadata=None,
                         experiment=None,
                         files={},
-                        publish=False):
+                        publish=False,
+                        mapping=None):
         """Create a new deposit for given user and schema name.
 
         e.g cms-analysis-v0.0.1,
@@ -335,7 +336,7 @@ def create_deposit(app, db, es, location, create_schema):
         """
         # create schema for record
         with app.test_request_context():
-            schema = create_schema(schema_name, experiment=experiment)
+            schema = create_schema(schema_name, experiment=experiment, deposit_mapping=mapping)
             deposit_schema_url = current_jsonschemas.path_to_url(
                 schema.deposit_path)
 
