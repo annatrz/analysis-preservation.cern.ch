@@ -23,12 +23,13 @@
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 """User module utils methods."""
 
-import ldap
-from cachetools.func import lru_cache
 from flask import current_app
-from invenio_accounts.models import Role, User
 from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.local import LocalProxy
+
+import ldap
+from cachetools.func import lru_cache
+from invenio_accounts.models import Role, User
 
 from .errors import DoesNotExistInLDAP
 

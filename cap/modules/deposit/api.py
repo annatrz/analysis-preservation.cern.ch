@@ -24,7 +24,6 @@
 """Deposit API."""
 
 import copy
-from functools import wraps
 
 from flask import current_app, request
 from flask_login import current_user
@@ -45,13 +44,13 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.local import LocalProxy
 
+from cap.activities import register_activity
 from cap.modules.deposit.errors import DisconnectWebhookError, FileUploadError
 from cap.modules.deposit.validators import DepositValidator
 from cap.modules.experiments.permissions import exp_need_factory
 from cap.modules.records.api import CAPRecord
 from cap.modules.repos.errors import GitError
 from cap.modules.repos.factory import create_git_api
-from cap.modules.repos.models import GitWebhook, GitWebhookSubscriber
 from cap.modules.repos.tasks import download_repo, download_repo_file
 from cap.modules.repos.utils import (create_webhook, disconnect_subscriber,
                                      parse_git_url)
@@ -70,7 +69,7 @@ from .permissions import (AdminDepositPermission, CloneDepositPermission,
 
 _datastore = LocalProxy(lambda: current_app.extensions['security'].datastore)
 
-PRESERVE_FIELDS = (
+PROTECTED_FIELDS = (
     '_deposit',
     '_buckets',
     '_files',
@@ -78,7 +77,6 @@ PRESERVE_FIELDS = (
     '_access',
     '_user_edited',
     '_fetched_from',
-    'general_title',
     '$schema',
 )
 
@@ -130,59 +128,6 @@ class CAPDeposit(Deposit):
         """Get schema path for deposit."""
         return current_jsonschemas.path_to_url(self.schema.deposit_path)
 
-    def pop_from_data(method, fields=None):
-        """Remove fields from deposit data.
-
-        :param fields: List of fields to remove (default: ``('_deposit',)``).
-        """
-        fields = fields or (
-            '_deposit',
-            '_access',
-            '_experiment',
-            '_fetched_from',
-            '_user_edited',
-            'general_title',
-            '$schema',
-        )
-
-        @wraps(method)
-        def wrapper(self, *args, **kwargs):
-            """Check current deposit status."""
-            for field in fields:
-                if field in args[0]:
-                    args[0].pop(field)
-
-            return method(self, *args, **kwargs)
-
-        return wrapper
-
-    def pop_from_data_patch(method, fields=None):
-        """Remove fields from deposit data.
-
-        :param fields: List of fields to remove (default: ``('_deposit',)``).
-        """
-        fields = fields or (
-            '/_deposit',
-            '/_access',
-            '/_files',
-            '/_experiment',
-            '/_fetched_from',
-            '/_user_edited',
-            '/$schema',
-        )
-
-        @wraps(method)
-        def wrapper(self, *args, **kwargs):
-            """Check current deposit status."""
-            for field in fields:
-                for k, patch in enumerate(args[0]):
-                    if field == patch.get("path", None):
-                        del args[0][k]
-
-            return method(self, *args, **kwargs)
-
-        return wrapper
-
     @mark_as_action
     def permissions(self, pid=None):
         """Permissions action.
@@ -196,10 +141,14 @@ class CAPDeposit(Deposit):
         }]
         """
         with AdminDepositPermission(self).require(403):
-
             data = request.get_json()
+            self.edit_permissions(data)
 
-            return self.edit_permissions(data)
+            register_activity('update permissions',
+                              data=data,
+                              object=self.model)
+
+            return self
 
     @mark_as_action
     def publish(self, *args, **kwargs):
@@ -210,7 +159,12 @@ class CAPDeposit(Deposit):
                 if file_.data['checksum'] is None:
                     raise MultipartMissingParts()
 
-            return super(CAPDeposit, self).publish(*args, **kwargs)
+            super(CAPDeposit, self).publish(*args, **kwargs)
+
+            # @TOFIX maybe fetched_published data instead of deposit data?
+            register_activity('publish analysis', object=self.model)
+
+            return self
 
     @has_status
     @mark_as_action
@@ -350,19 +304,36 @@ class CAPDeposit(Deposit):
             self.files.bucket.locked = False
             db.session.commit()
 
+            register_activity('reedit published analysis', object=self.model)
+
             return self
 
-    @pop_from_data
     def update(self, *args, **kwargs):
         """Update deposit."""
         with UpdateDepositPermission(self).require(403):
+            # filter out protected fields
+            for field in PROTECTED_FIELDS:
+                if field in args[0]:
+                    args[0].pop(field)
+
             super(CAPDeposit, self).update(*args, **kwargs)
 
-    @pop_from_data_patch
+            register_activity('update analysis', object=self.model)
+
     def patch(self, *args, **kwargs):
         """Patch deposit."""
         with UpdateDepositPermission(self).require(403):
-            return super(CAPDeposit, self).patch(*args, **kwargs)
+            # filter out protected fields
+            for field in ('/' + field for field in PROTECTED_FIELDS):
+                for patch in args[0]:
+                    if patch.get("path", "").startswith(field):
+                        args[0].remove(patch)
+
+            deposit = super(CAPDeposit, self).patch(*args, **kwargs)
+
+            register_activity('patch analysis', object=self.model)
+
+            return deposit
 
     def edit_permissions(self, data):
         """Edit deposit permissions.
@@ -424,13 +395,15 @@ class CAPDeposit(Deposit):
                                 'Permission does not exist.')
 
         self.commit()
+        register_activity('update permissions', data=data, object=self.model)
 
         return self
 
-    @preserve(result=False, fields=PRESERVE_FIELDS)
+    @preserve(result=False, fields=PROTECTED_FIELDS)
     def clear(self, *args, **kwargs):
         """Clear only drafts."""
         super(CAPDeposit, self).clear(*args, **kwargs)
+        # register_activity('clear deposit', object=self.model)
 
     def is_published(self):
         """Check if deposit is published."""
@@ -602,8 +575,13 @@ class CAPDeposit(Deposit):
         deposit._create_buckets()
         deposit._set_experiment()
         deposit._init_owner_permissions(owner)
-
         deposit.commit()
+
+        register_activity(
+            'create deposit',
+            data=data,
+            object=deposit.model,
+        )
 
         return deposit
 

@@ -28,12 +28,12 @@ from __future__ import absolute_import, print_function
 
 import json
 
+from invenio_jsonschemas.errors import JSONSchemaNotFound
 from invenio_records.api import RecordMetadata
+from pytest import mark, raises
 
 from cap.modules.deposit.api import CAPDeposit
 from cap.modules.schemas.models import Schema
-from invenio_jsonschemas.errors import JSONSchemaNotFound
-from pytest import mark, raises
 
 
 #######################
@@ -46,8 +46,8 @@ def test_create_deposit_when_user_not_logged_in_returns_403(client, users):
 
 
 def test_create_deposit_when_user_is_member_of_schema_experiment_can_create_deposit(
-        client, users, location, json_headers, auth_headers_for_user,
-        create_schema):
+    client, db, users, location, json_headers, auth_headers_for_user,
+    create_schema):
     user = users['cms_user']
     other_user = users['lhcb_user']
     schema = create_schema('cms', experiment='CMS')
@@ -70,8 +70,8 @@ def test_create_deposit_when_user_is_member_of_schema_experiment_can_create_depo
 
 
 def test_create_deposit_when_user_is_member_of_egroup_that_has_read_access_to_schema_can_create_deposit(
-        client, users, location, json_headers, auth_headers_for_user,
-        create_schema):
+    client, users, location, json_headers, auth_headers_for_user,
+    create_schema):
     user = users['lhcb_user']
     schema = create_schema('cms', experiment='LHCb')
     metadata = {'$ana_type': 'cms'}
